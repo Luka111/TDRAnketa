@@ -1,0 +1,9 @@
+  <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.title.$invalid }">
+    <label mean-token="'create-title'" class="col-md-3 control-label">Label</label>
+    <div class="col-md-9">
+      <input name="label" type="text" class="form-control" data-ng-model="pointerObj.label" id="label" placeholder="Label" required>
+      <div ng-show="submitted && questionForm.label.$invalid" class="help-block">
+        <p ng-show="questionForm.label.$error.required">Label is required</p>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,41 @@
+<section data-ng-controller="UsersController" data-ng-init="findOne()">
+  <form name="userUpdateForm" ng-submit="update(userUpdateForm.$valid)" role="form" class="form-horizontal" novalidate style="float:left; width:50%;">
+    <div class="form-group">
+      <label for="name" class="col-md-4 control-label">Full Name</label>
+      <div class="col-md-8">
+        <input id="name" type="text" name="name" placeholder="Full name" class="form-control" ng-model="user.name"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="roles" class="col-md-4 control-label">Role</label>
+      <div class="col-md-8">
+        <select class="btn btn-default" name="role" ng-model="user.role" ng-options="role for role in roles" ng-change="ifAdminLangAll(user.role)">
+        </select>
+      </div>
+    </div>
+    <div ng-if="user.role !== 'top-admin'" class="form-group">
+      <label mean-token="'create-title'" class="col-md-4 control-label">Language</label>
+      <div class="col-md-8">
+        <select class="btn btn-default" name="language" ng-model="user.language" ng-options="value for value in languageShortcodeArray">
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="email" class="col-md-4 control-label">Email</label>
+      <div class="col-md-8">
+        <input id="email" type="email" name="email" placeholder="Email" class="form-control" ng-model="user.email"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="username" class="col-md-4 control-label">Username</label>
+      <div class="col-md-8">
+        <input id="username" type="text" name="username" placeholder="Username" class="form-control" ng-model="user.username"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-md-offset-4 col-md-8">
+        <button type="submit" class="btn btn-primary">Update</button>
+      </div>
+    </div>
+  </form>
+</section>

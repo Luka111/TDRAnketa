@@ -1,0 +1,114 @@
+<section data-ng-controller="PollsController" data-ng-init="findQuestionnaireAndInitAnswers()">
+  <div ng-show="noQuestionnaire" class="box">
+    <h3 class="equal-padding">You haven't chosen questionnaire, <a ui-sref="pick active questionnaire">Please choose one</a></h3>
+  </div>
+  <div ng-show="questionnaire">
+    <!-- HIDE choose button
+    <button type="button" class="btn btn-warning" ng-click="removeQuestionnaire()">Choose another questionnaire</button>
+    -->
+    <br/><br/>
+    <form name="answerForm" class="form-horizontal" role="form" data-ng-submit="create(answerForm.$valid)" novalidate>
+      <!-- HIDE questionnaire title
+      <h1>{{questionnaire.title}}</h1>
+      -->
+      <ul class="pagination">
+        <li ng-repeat="slide in questionnaire.content track by $index" ng-class="{'active': $index === slideIndex}"><span>{{$index + 1}}</span></li>
+      </ul>
+      <div class="progress">
+        <div class="progress-bar" role="progressbar" aria-valuenow="{{completedPercent}}" aria-valuemin="0" aria-valuemax="100" ng-style="completedPercentStyle">
+          {{completedPercent}}%
+        </div>
+      </div>
+      <!-- HIDE CREATOR INFO
+      <span>{{questionnaire.created | date:'medium'}}</span> /
+      <span>{{questionnaire.user.name}}</span>
+      -->
+      <ul rn-carousel rn-carousel-index="slideIndex" rn-carousel-swipe="true">
+        <li data-ng-repeat="form in loadedForms track by $index" class="light-box">
+          <!-- TEST
+          <h1>QUESTIONS COUNTER {{form.questionsCounter}}</h1>
+          <h1>{{slideIndex}}</h1>
+          -->
+          <h2 class="dark-box">
+            <span translate>{{form.title}}</span>
+          </h2>
+          <accordion close-others="true">
+            <div ng-repeat="question in form.content track by $index" ng-if="question.src !== ''" class="box">
+              <div ng-switch on="question.type">
+                <!--
+                <span>{{question.type}}</span><br/>
+                -->
+                <div ng-switch-when="Question">
+                  <accordion-group is-open="question.isToggled" is-disabled="question.disabled">
+                  <accordion-heading><h3 style="cursor: pointer;" ng-class="{'text-muted': question.disabled}">{{question.title}}<span ng-show="!!question.answer" style="color:#428bca;"> - {{question.answer}}</span></h3></accordion-heading>
+                    <!--
+                    <h3>
+                    {{question.title}}
+                    TESTING
+                    <h1>{{question.required}}</h1>
+                    <h1>{{question.saveDisabled}}</h1>
+                    {{question.conditional}}
+                    ({{question.kind}})
+                    </h3>
+                    <hr class="grey-line"/>
+                    -->
+                    <!-- DIFFERENT INPUT TYPE - DEPENDS ON QUESTION.KIND -->
+                    <!-- RADIO -->
+                    <div ng-if="question.kind === 'radio'">
+                      <div ng-if="!question.required && !!question.answer">
+                        <a class="btn" data-ng-click="removeAnswer(question)" style="color:red;">
+                          <i class="glyphicon glyphicon-remove"></i>
+                        </a>
+                      </div>
+                      <div ng-repeat="answer in question.content track by $index">
+                        <h3>
+                        <input type="radio" class="css-checkbox" ng-model="question.answer" ng-value="answer" ng-change="calculateCounter(question,form)" ng-required="question.required" ng-disabled="question.disabled"><label class="css-label">{{answer}}</label>
+                        </h3>
+                      </div>
+                    </div>
+                    <!-- EMAIL -->
+                    <div ng-if="question.kind === 'email'">
+                      <input class="form-control" type="email" ng-model="question.answer" ng-value="answer" ng-blur="calculateCounter(question,form)" ng-required="question.required" ng-disabled="question.disabled" placeholder="Enter e-mail...">
+                    </div>
+                    <!-- TEXTAREA -->
+                    <div ng-if="question.kind === 'textarea'">
+                      <textarea class="form-control" type="textarea" ng-model="question.answer" ng-value="answer" ng-blur="calculateCounter(question,form)" ng-required="question.required" ng-disabled="question.disabled" ng-trim="true" ng-maxlength="120" rows="8"></textarea>
+                    </div>
+                  </accordion-group>
+                </div>
+                <div ng-switch-when="Label">
+                  <h3 class="equal-margin-less">{{question.label}}</h3>
+                </div>
+
+                <div ng-switch-when="Image">
+                  <div style="width:100%" class="img-responsive">
+                    <a ng-href="/packages/system/public/media/{{question.src}}" data-lightbox="tdr-anketa">
+                      <button type="button" class="btn btn-success" ng-disabled="question.disabled" ng-click="calculateCounter(question,form)"><i class="glyphicon big-icon glyphicon-picture"></i></button>
+                    </a>
+                  </div>
+                </div>
+                <div ng-switch-when="Video">
+                  <div style="width:100%" ng-click="calculateCounter(question,form)"  class="img-responsive">
+                    <questionvideo played="question.answeredIndicator" disabled="question.disabled" src='{{question.fullSrc}}' type='{{question.fileType}}'/>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </accordion>
+          <div style="margin-bottom:5px;" ng-if="showSubmit">
+            <button type="submit" class="btn-lg btn-block btn-primary">Submit</button>
+          </div>
+          <div ng-show="permissionDenied">
+            <div class="alert alert-danger" role="alert"><span><strong>{{permissionDenied}}</strong></span></div>
+          </div>
+          <div ng-show="positionUnavailable">
+            <div class="alert alert-warning" role="alert"><span><strong>{{positionUnavailable}}</strong></span></div>
+          </div>
+          <div ng-show="timeoutExpired">
+            <div class="alert alert-danger" role="alert"><span><strong>{{timeoutExpired}}</strong></span></div>
+          </div>
+        </li>
+      </ul>
+    </form>
+  </div>
+</section>

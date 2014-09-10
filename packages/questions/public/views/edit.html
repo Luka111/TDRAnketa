@@ -1,0 +1,32 @@
+<section data-ng-controller="QuestionsController" data-ng-init="findOne()">
+  <form name="questionForm" class="form-horizontal col-md-6" role="form" data-ng-submit="update(questionForm.$valid)" novalidate>
+
+    <!-- 
+      It is pointless to give an option to change the question type
+      If you want to change the type, make the new question
+    <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.title.$invalid }">
+      <label mean-token="'create-title'" class="col-md-2 control-label">Type</label>
+      <div class="col-md-10">
+        <select class="btn btn-default" name="type" ng-model="question.type" required ng-options="value for value in types">
+        </select>
+      </div>
+    </div>
+    -->
+
+    <div ng-switch on="question.type">
+      <div ng-switch-when="Question">
+        <ng-include src="'questions/views/edit-question.html'"></ng-include>
+      </div>
+      <div ng-switch-when="Label">
+        <ng-include src="'questions/views/edit-label.html'"></ng-include>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-md-offset-2 col-md-10">
+        <button mean-token="'edit-submit'" type="submit" class="btn-lg btn-info">Submit</button>
+        <button mean-token="'edit-remove'" ng-click="remove(question)" class="btn-lg btn-danger">Delete</button>
+      </div>
+    </div>
+  </form>
+</section>

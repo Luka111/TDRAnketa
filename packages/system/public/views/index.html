@@ -1,0 +1,20 @@
+<section data-ng-controller="IndexController">
+  <h2 ng-if="myName">Welcome, {{myName}}.</h2><br/>
+  <!--
+  <div ng-if="myRole === 'top-admin' || myRole === 'client-admin'">
+    <ng-include src="'/polls/views/admin-list.html'"></ng-include>
+  </div>
+  <div ng-if="myRole === 'manager'">
+    <ng-include src="'/polls/views/manager-list.html'"></ng-include>
+  </div>
+  <div ng-if="myRole === 'supervisor'">
+    <ng-include src="'/polls/views/supervisor-list.html'"></ng-include>
+  </div>
+  -->
+  <div ng-if="myRole === 'operater'">
+    <ng-include src="'/polls/views/index.html'"></ng-include>
+  </div>
+  <div ng-if="myRole === ''">
+    <ng-include src="'/system/views/non-auth-index.html'"></ng-include>
+  </div>
+</section>

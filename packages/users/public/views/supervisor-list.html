@@ -1,0 +1,19 @@
+<section data-ng-controller="UsersController" data-ng-init="findUsersForSupervisor()">
+  <input type="text" ng-model="searchUsers" class="form-control" placeholder="Search users" style="width:300px;"></input>
+  <hr class="grey-line"/>
+  <div ng-repeat="user in users | filter : searchUsers">
+    <h3>
+      <span>Username: <a data-ng-href="#!/users/{{user._id}}">{{user.username}}</a></span></br>
+    </h3>
+    <h4>
+      <span style="color:#666;">Role: {{user.roles[1]}}</span></br></br>
+      <span>Name: {{user.name}}</span></br></br>
+      <span>Email: {{user.email}}</span></br></br>
+      <span>Language: {{user.language}}</span></br></br>
+      </br>
+      <hr style="border-bottom:solid 1px #33bbbb; width:20%; float:left;"/>
+      </br>
+      </br>
+    </h4>
+  </div>
+</section>

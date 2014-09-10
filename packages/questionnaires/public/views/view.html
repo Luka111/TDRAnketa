@@ -1,0 +1,66 @@
+<section data-ng-controller="QuestionnairesController" data-ng-init="findOne()">
+  <span>{{questionnaire.created | date:'medium'}}</span> /
+  <span>{{questionnaire.user.name || 'USER NOT EXIST'}}</span>
+  <br/>
+  <span><strong>Language: {{questionnaire.language}}</strong></span>
+  <div ng-if="questionnaire.active">
+    <h4 style="color:green;">Active</h4>
+  </div>
+  <div ng-if="!questionnaire.active">
+    <h4 style="color:red;">NON Active</h4>
+  </div>
+  <h2>{{questionnaire.title}}</h2>
+  <div data-ng-if="hasAuthorization(questionnaire)">
+    <a class="btn" href="/#!/questionnaires/{{questionnaire._id}}/edit">
+      <i class="glyphicon glyphicon-edit"></i>
+    </a>
+    <a class="btn" data-ng-click="remove();">
+      <i class="glyphicon glyphicon-trash"></i>
+    </a>
+  </div>
+  <ul>
+    <li data-ng-repeat="form in questionnaire.content track by $index" style="padding-bottom:15px; border:1px solid #999; padding:10px; margin-bottom:30px;">
+      <span>{{form.created | date:'medium'}}</span> / 
+      <span>{{form.user.name}}</span>
+      <h2>
+        <span translate>{{form.title}}</span>
+      </h2>
+      <div ng-repeat="question in form.content track by $index" style="border:1px solid #aaa; padding:10px; margin-bottom:15px;">
+        <div ng-switch on="question.type">
+          <span>{{question.type}}<span ng-if="question.type === 'Question'"> - {{question.kind}}</span></span>
+          <h2>
+            <div ng-switch-when="Question">
+              {{question.title}}
+              <ul>
+                <li ng-repeat="answer in question.content track by $index">
+                  {{answer}}
+                </li>
+              </ul>
+            </div>
+            <div ng-switch-when="Label">
+              {{question.label}}
+            </div>
+          </h2>
+          <div ng-switch-when="Image">
+            <div class="img-responsive" ng-if="question.src">
+              <img class="img-responsive" ng-src="/packages/system/public/media/{{question.src}}"/>
+            </div>
+            <div ng-hide="question.src">
+              <img class="img-responsive" style="margin-bottom:10px; border:1px solid #222;" ng-src="/packages/system/public/media/image-placeholder.png"/>
+            </div>
+          </div>
+          <div ng-switch-when="Video">
+            <div class="img-responsive" ng-if="question.src">
+            <video controls>
+              <source ng-src='{{question.fullSrc}}' type='{{question.fileType}}'>
+            </video>
+            </div>
+            <div ng-hide="question.src">
+              <img class="img-responsive" style="margin-bottom:10px;" ng-src="/packages/system/public/media/video-placeholder.jpg"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+  </ul>
+</section>

@@ -1,0 +1,23 @@
+{
+  "name": "mean",
+  "version": "0.4.0",
+  "dependencies": {
+    "jquery": "1.x",
+    "angular": "latest",
+    "angular-resource": "latest",
+    "angular-cookies": "latest",
+    "angular-mocks": "latest",
+    "angular-route": "latest",
+    "angular-sanitize": "latest",
+    "bootstrap": "3.1.1",
+    "angular-bootstrap": "0.11.0",
+    "angular-ui-router": "#master",
+    "angular-gettext": "latest",
+    "angular-carousel": "latest",
+    "openlayers": "openlayers/ol3#0c8f29c432",
+    "proj4": "latest",
+    "lightbox": "latest",
+    "ng-grid": "latest",
+    "angular-charts": "latest"
+  }
+}

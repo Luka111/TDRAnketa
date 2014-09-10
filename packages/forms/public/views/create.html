@@ -1,0 +1,163 @@
+<section data-ng-controller="FormsController" data-ng-init="findQuestions()">
+  <div class="col-md-6">
+    <h2>Make new Form. Add questions or Image/Video placeholders.</h2>
+    <br/>
+    <form name="formForm" class="form-horizontal" role="form" data-ng-submit="create(formForm.$valid)" novalidate>
+      <div class="form-group" ng-class="{ 'has-error' : submitted && formForm.title.$invalid }">
+        <label mean-token="'create-title'" class="col-md-3 control-label">Title</label>
+        <div class="col-md-9">
+          <input name="title" type="text" class="form-control" data-ng-model="title" id="title" placeholder="Title" required>
+          <div ng-show="submitted && formForm.title.$invalid" class="help-block">
+            <p ng-show="formForm.title.$error.required">Title is required</p>
+          </div>
+        </div>
+
+      </div>
+      <div class="form-group" ng-class="{ 'has-error' : submitted && formForm.content.$invalid }">
+        <label mean-token="'create-content'" for="content" class="col-md-3 control-label">Content</label>
+        <div class="col-md-9">
+          <ul>
+            <accordion close-others="true">
+              <li data-ng-repeat="question in content track by $index">
+                <div ng-if="question.type === 'Image' || question.type === 'Video'">
+                  <div ng-if="question.type === 'Image'">
+                    <h3>IMAGE PLACEHOLDER</h3>
+                  </div>
+                  <div ng-if="question.type === 'Video'">
+                    <h3>VIDEO PLACEHOLDER</h3>
+                  </div>
+                </div>
+                <div ng-if="!(question.type === 'Image' || question.type === 'Video')">
+                  <h4 style="color:#666;">
+                    <a class="btn" data-ng-click="removeQuestion($index,content)" style="color:purple;">
+                      <i class="glyphicon glyphicon-minus"></i>
+                    </a>
+                    <span>{{question.type}}<span ng-if="question.type === 'Question'"> - {{question.kind}}</span></span>
+                  </h4>
+                  <h2>
+                    <accordion-group>
+                    <accordion-heading>
+                      <div ng-if="question.type === 'Question'">
+                        <a href="#" translate>{{question.title}}</a>
+                      </div>
+                      <div ng-if="question.type === 'Label'">
+                        <a href="#" translate>{{question.label}}</a>
+                      </div>
+                    </accordion-heading>
+                    <div ng-if="question.type === 'Question'">
+                      <h5 ng-if="question.kind === 'radio'">Answers:
+                      <span ng-repeat="answer in question.content">
+                        <strong>{{answer}}<span ng-if="!$last">,</span></strong> 
+                      </span>
+                      </h5>
+                      <h5>Required: <strong>{{question.required}}</strong></h5>
+                      <h5>Conditional: <strong>{{question.conditional.kind}}</strong><span ng-if="!!question.conditional.value"> on value <strong>{{question.conditional.value}}</strong></span></h5>
+                    </div>
+                    <h5>Creator: <strong>{{question.user.name}}</strong></h5>
+                    <h5>Date: <strong>{{question.created | date:'medium'}}</strong></h5>
+                    <span data-ng-if="hasAuthorization(question)">
+                      <a class="btn" href="/#!/questions/{{question._id}}/edit">
+                        Edit <i class="glyphicon glyphicon-edit"></i>
+                      </a>
+                      <!-- DISABLE DELETING QUESTIONS FROM FORM CREATING
+                      <a class="btn" data-ng-click="remove(question);">
+                        <i class="glyphicon glyphicon-trash"></i>
+                      </a>
+                      -->
+                    </span>
+                    </accordion-group>
+                  </h2>
+                </div>
+              </li>
+            </accordion>
+          </ul>
+          <div ng-show="contentMissing" class="help-block">
+            <p style="color:#FA787E;" ng-show="contentMissing">Content is required</p>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-md-offset-3 col-md-9">
+          <button type="submit" class="btn btn-info">Submit</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="col-md-6">
+    <h1 style="color:orange;">Placeholders</h1>
+    <hr style="border-top:1px solid #ddd;"/>
+    <div class="col-sm-6">
+      <center><a class="btn" style="font-size:40px" data-ng-click="addQuestion(null,-1,content)" style="color:orange;">
+        <i class="glyphicon glyphicon-play-circle"></i>
+        <span>Video</span>
+      </a></center>
+    </div>
+    <div class="col-sm-6">
+      <center><a class="btn" style="font-size:40px" data-ng-click="addQuestion(null,-2,content)" style="color:orange;">
+        <i class="glyphicon glyphicon-camera"></i>
+        <span>Image</span>
+      </a></center>
+    </div>
+    <h1 style="color:orange;">
+      <div class="row">
+        <div class="col-lg-4">
+          <span>Questions</span>
+        </div>
+        <div class="col-lg-8">
+          <input class="form-control" type="text" ng-model="questionText" placeholder="Search">
+        </div>
+      </div>
+    </h1>
+    <hr style="border-top:1px solid #ddd;"/>
+    <ul class="questions unstyled">
+      <accordion close-others="true">
+        <li data-ng-repeat="question in questions | filter:questionText track by $index">
+          <h4 style="color:#666;">
+            <a class="btn" data-ng-click="addQuestion(question,content)" style="color:orange;">
+              <i class="glyphicon glyphicon-plus"></i>
+            </a>
+            <span>{{question.type}}<span ng-if="question.type === 'Question'"> - {{question.kind}}</span></span>
+          </h4>
+          <h2>
+            <accordion-group>
+              <accordion-heading>
+                <h4>
+                <div ng-switch on="question.type">
+                  <div ng-switch-when="Question">
+                    <a href="#" translate>{{question.title}}</a>
+                  </div>
+                  <div ng-switch-when="Label">
+                    <a href="#" translate>{{question.label}}</a>
+                  </div>
+                </div>
+                </h4>
+              </accordion-heading>
+              <div ng-if="question.type === 'Question'">
+                <h5 ng-if="question.kind === 'radio'">Answers:
+                <span ng-repeat="answer in question.content">
+                  <strong>{{answer}}<span ng-if="!$last">,</span></strong> 
+                </span>
+                </h5>
+                <h5>Required: <strong>{{question.required}}</strong></h5>
+                <h5>Conditional: <strong>{{question.conditional.kind}}</strong> on value <strong>{{question.conditional.value}}</strong></h5>
+              </div>
+              <h5>Creator: <strong>{{question.user.name}}</strong></h5>
+              <h5>Date: <strong>{{question.created | date:'medium'}}</strong></h5>
+              <span data-ng-if="hasAuthorization(question)">
+                <a class="btn" href="/#!/questions/{{question._id}}/edit">
+                  Edit <i class="glyphicon glyphicon-edit"></i>
+                </a>
+                <!--
+                <a class="btn" data-ng-click="remove(question);">
+                  <i class="glyphicon glyphicon-trash"></i>
+                </a>
+                -->
+              </span>
+            </accordion-group>
+          </h2>
+        </li>
+      </accordion>
+    </ul>
+    <h1 data-ng-hide="!questions || questions.length">No questions yet. <br> Why don't you <a href="/#!/questions/create">Create One</a>?</h1>
+  </div>
+</section>

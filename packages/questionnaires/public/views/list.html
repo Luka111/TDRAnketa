@@ -1,0 +1,83 @@
+<section data-ng-controller="QuestionnairesController" data-ng-init="find()">
+  <h1>Questionnaires
+  <button class="btn btn-success" ui-sref="create questionnaire">Add New Questionnaire</button>
+  </h1>
+  <input type="text" ng-model="searchQuestionnaires" class="form-control" placeholder="Search forms" style="width:300px;"></input>
+  <hr class="grey-line"/>
+  <ul class="questionnaires unstyled">
+    <li data-ng-repeat="questionnaire in questionnaires | filter : searchQuestionnaires" style="border-bottom:1px solid orange; margin-bottom:10px; width:50%;">
+      <span>{{questionnaire.created | date:'medium'}}</span> /
+      <span>{{questionnaire.user.name || 'USER NOT EXIST'}}</span>
+      <br/>
+      <span><strong>Language: {{questionnaire.language}}</strong></span>
+      <div ng-if="questionnaire.active">
+        <h4 style="color:green;">Active</h4>
+      </div>
+      <div ng-if="!questionnaire.active">
+        <h4 style="color:red;">NON Active</h4>
+      </div>
+      <h2>
+        <a data-ng-href="#!/questionnaires/{{questionnaire._id}}">{{questionnaire.title}}</a>
+        <span data-ng-if="hasAuthorization(questionnaire)">
+          <a class="btn" href="/#!/questionnaires/{{questionnaire._id}}/edit">
+            <i class="glyphicon glyphicon-edit"></i>
+          </a>
+          <a class="btn" data-ng-click="remove(questionnaire);">
+            <i class="glyphicon glyphicon-trash"></i>
+          </a>
+        </span>
+      </h2>
+      <ul>
+        <accordion close-others="true">
+          <li data-ng-repeat="form in questionnaire.content track by $index" style="padding-bottom:15px">
+            <!--
+            <span>{{form.created | date:'medium'}}</span> / 
+            <span>{{form.user.name}}</span>
+            -->
+            <accordion-group>
+              <accordion-heading>
+                <h4>
+                  <a href="#" translate>{{form.title}}</a>
+                </h4>
+              </accordion-heading>
+              <ul>
+                <accordion>
+                  <li ng-repeat="question in form.content">
+                    <h4 style="color:#666;">
+                      <span>{{question.type}}<span ng-if="question.type === 'Question'"> - {{question.kind}}</span></span>
+                    </h4>
+                    <h2>
+                      <div ng-if="question.type === 'Label'">
+                        <h4>
+                          <span translate>{{question.label}}</span>
+                        </h4>
+                      </div>
+                      <div ng-if="question.type === 'Question'">
+                        <accordion-group>
+                          <accordion-heading>
+                            <h4>
+                              <a href="#" translate>{{question.title}}</a>
+                            </h4>
+                          </accordion-heading>
+                          <h5 ng-if="question.kind === 'radio'">Answers:
+                          <span ng-repeat="answer in question.content">
+                            <strong>{{answer}}<span ng-if="!$last">,</span></strong> 
+                          </span>
+                          </h5>
+                          <h5>Required: <strong>{{question.required}}</strong></h5>
+                          <h5>Conditional: <strong>{{question.conditional.kind}}</strong><span ng-if="!!question.conditional.value"> on value <strong>{{question.conditional.value}}</strong></span></h5>
+                        </accordion-group>
+                      </div>
+                    </h2>
+                  </li>
+                </accordion>
+              </ul>
+            </accordion-group>
+              <!-- FORM teaser mode -->
+          </li>
+        </accordion>
+      </ul>
+    </li>
+  </ul>
+  <h1 data-ng-hide="!questionnaires || questionnaires.length">No questionnaires yet. <br> Why don't you <a href="/#!/questionnaires/create">Create One</a>?</h1>
+</section>

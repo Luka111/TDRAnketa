@@ -1,0 +1,49 @@
+<section data-ng-controller="FormsController" data-ng-init="findOne()">
+  <span>{{form.created | date:'medium'}}</span> /
+  <span>{{form.user.name}}</span>
+  <h2>{{form.title}}</h2>
+  <div data-ng-if="hasAuthorization(form)">
+    <a class="btn" href="/#!/forms/{{form._id}}/edit">
+      <i class="glyphicon glyphicon-edit"></i>
+    </a>
+    <a class="btn" data-ng-click="remove();">
+      <i class="glyphicon glyphicon-trash"></i>
+    </a>
+  </div>
+  <ul>
+    <li data-ng-repeat="question in form.content track by $index" style="padding-bottom:15px">
+      <h3 style="color:#666;">{{question.type}}</h3>
+      <span>{{question.created | date:'medium'}}</span> / 
+      <span>{{question.user.name || 'USER NOT EXIST'}}</span>
+      <h4>
+        <div ng-switch on="question.type">
+          <div ng-switch-when="Question">
+            <a data-ng-href="#!/questions/{{question._id}}" translate>{{question.title}}</a>
+          </div>
+          <div ng-switch-when="Label">
+            <a data-ng-href="#!/questions/{{question._id}}" translate>{{question.label}}</a>
+          </div>
+          <div ng-switch-when="Image">
+            <h3>IMAGE PLACEHOLDER</h3>
+          </div>
+          <div ng-switch-when="Video">
+            <h3>VIDEO PLACEHOLDER</h3>
+          </div>
+        </div>
+        <span data-ng-if="hasAuthorization(question)">
+          <a class="btn" href="/#!/questions/{{question._id}}/edit">
+            <i class="glyphicon glyphicon-edit"></i>
+          </a>
+          <a class="btn" data-ng-click="remove(question);">
+            <i class="glyphicon glyphicon-trash"></i>
+          </a>
+        </span>
+        <ul>
+          <li data-ng-repeat="answer in question.content track by $index">
+            <span>{{answer}}</span>
+          </li>
+        </ul>
+      </h4>
+    </li>
+  </ul>
+</section>

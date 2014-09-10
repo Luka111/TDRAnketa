@@ -1,0 +1,17 @@
+<section data-ng-init="findPollsByLang()">
+  <h1>Polls:</h1>
+  <ul class="polls unstyled">
+    <li data-ng-repeat="poll in polls" style="border-bottom:1px solid orange; margin-bottom:10px; width:50%;">
+      <span>{{poll.created | date:'medium'}}</span> /
+      <span>{{poll.user.name || 'USER NOT EXIST'}}</span>
+      <h2>
+        <a data-ng-href="#!/questionnaires/{{poll.questionnaire._id}}">{{poll.questionnaire.title}}</a>
+      </h2>
+      <h4>
+        <div ng-repeat="answer in poll.answers track by $index">
+          {{answer}}
+        </div>
+      </h4>
+    </li>
+  </ul>
+</section>

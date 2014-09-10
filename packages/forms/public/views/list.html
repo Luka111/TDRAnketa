@@ -1,0 +1,61 @@
+<section data-ng-controller="FormsController" data-ng-init="find()">
+  <h1>Forms
+  <button class="btn btn-success" ui-sref="create form">Add New Form</button>
+  </h1>
+  <input type="text" ng-model="searchForms" class="form-control" placeholder="Search forms" style="width:300px;"></input>
+  <hr class="grey-line"/>
+  <ul class="forms unstyled">
+    <li data-ng-repeat="form in forms | filter : searchForms" style="border-bottom:1px solid orange; margin-bottom:10px; width:50%;">
+      <span>{{form.created | date:'medium'}}</span> /
+      <span>{{form.user.name || 'USER NOT EXIST'}}</span>
+      <h2>
+        <a data-ng-href="#!/forms/{{form._id}}">{{form.title}}</a><br/>
+        <span data-ng-if="hasAuthorization(form)">
+          <a class="btn" href="/#!/forms/{{form._id}}/edit">
+            Edit form <i class="glyphicon glyphicon-edit"></i>
+          </a>
+          <a class="btn" data-ng-click="remove(form);">
+            Remove form <i class="glyphicon glyphicon-trash"></i>
+          </a>
+        </span><hr class="grey-line"/>
+      </h2>
+      <ul>
+        <li data-ng-repeat="question in form.content track by $index" style="padding-bottom:15px">
+          <h3 style="color:#666;">{{question.type}}</h3>
+          <div ng-if="question.type === 'Question' || question.type === 'Label'">
+            <!--
+            <span>{{question.created | date:'medium'}}</span> / 
+            <span>{{question.user.name}}</span>
+            -->
+            <h4>
+              <div ng-switch on="question.type">
+                <div ng-switch-when="Question">
+                  <a data-ng-href="#!/questions/{{question._id}}" translate>{{question.title}}</a>
+                </div>
+                <div ng-switch-when="Label">
+                  <a data-ng-href="#!/questions/{{question._id}}" translate>{{question.label}}</a>
+                </div>
+              </div>
+              <ul>
+                <li data-ng-repeat="answer in question.content track by $index">
+                  <span>{{answer}}</span>
+                </li>
+              </ul>
+              <span data-ng-if="hasAuthorization(question)">
+                <a class="btn" href="/#!/questions/{{question._id}}/edit">
+                  Edit question <i class="glyphicon glyphicon-edit"></i>
+                </a>
+                <!--
+                <a class="btn" data-ng-click="remove(question);">
+                  <i class="glyphicon glyphicon-trash"></i>
+                </a>
+                -->
+              </span>
+            </h4>
+          </div>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h1 data-ng-hide="!forms || forms.length">No forms yet. <br> Why don't you <a href="/#!/forms/create">Create One</a>?</h1>
+</section>

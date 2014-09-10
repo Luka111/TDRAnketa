@@ -1,0 +1,4 @@
+<div data-ng-controller="HeaderController">
+  <div ng-if="!global.isOperater && global.authenticated" ng-include="'/system/views/admin-header.html'"></div>
+  <div ng-if="global.isOperater" ng-include="'/system/views/operater-header.html'"></div>
+</div>

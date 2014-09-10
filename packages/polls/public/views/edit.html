@@ -1,0 +1,28 @@
+<section data-ng-controller="PollsController" data-ng-init="findOneAndPopulateAnswers()">
+  <form name="answerForm" class="form-horizontal" role="form" data-ng-submit="update(answerForm.$valid)" novalidate>
+    <span>{{poll.created | date:'medium'}}</span> /
+    <span>{{poll.user.name}}</span>
+    <h2>
+      <a data-ng-href="#!/questionnaires/{{poll.questionnaire._id}}">{{poll.questionnaire.title}}</a>
+      {{poll.answers}}
+    </h2>
+    <h4>
+      <div ng-repeat="titleAnswer in checkedAnswers track by $index">
+        <div>
+          <h3>{{titleAnswer.title}}</h3>
+          {{titleAnswer}}
+          <div ng-if="!titleAnswer.required">
+            <a class="btn" data-ng-click="removeAnswer(poll.answers[titleAnswer.answerId])" style="color:red;">
+              <i class="glyphicon glyphicon-remove"></i>
+            </a>
+          </div>
+          <div ng-repeat="answer in titleAnswer.answers">
+            {{answer}}
+            <input type="radio" ng-model="poll.answers[titleAnswer.answerId].answer" ng-value="answer" ng-required="titleAnswer.required">
+          </div>
+        </div>
+      </div>
+    </h4>
+    <button type="submit" class="btn btn-info">Submit</button>
+  </form>
+</section>

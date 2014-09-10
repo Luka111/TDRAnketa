@@ -1,0 +1,79 @@
+<section data-ng-controller="PollsController">
+  <!-- CSS CLASS DEPENDS ON $scope.disableQuery, true if disabled false if not -->
+  <div class="row">
+    <div class="col-md-4">
+      <h4>Date From {{dateFromCriteria}}</h4>
+      <div style="display:inline-block; min-height:290px;">
+        <datepicker ng-model="stats.dateFrom" max-date="'2015-06-22'" datepicker-options="dateOptions" class="well well-sm" ng-change="convertFrom()"></datepicker>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div style="display:inline-block; min-height:290px;">
+        <h4>Date To {{dateToCriteria}}</h4>
+        <datepicker ng-model="stats.dateTo" max-date="'2015-06-22'" datepicker-options="dateOptions" class="well well-sm" ng-change="convertTo()"></datepicker>
+      </div>
+    </div>
+    <div ng-if="activeTab === 5" class="col-md-4">
+      <h4>Options</h4>
+      <tabset ng-show="userStatsCriteria">
+        <tab heading="Operaters" select="emptyLocationResults()">
+          <div style="height:150px;">
+            <div ng-hide="disableQuery" style="width:100%; height:150px;" class="gridStyle" ng-grid="distinctUsersGridOptions">
+            </div>
+            <center><div ng-show="disableQuery" style="width:60%;"><img class="img-responsive" src="/polls/assets/img/loading.gif"></img></div></center>
+          </div><br/>
+        </tab>
+        <tab ng-if = "myRole !== 'supervisor'" heading="Supervisors" select="emptyLocationResults()">
+          <div style="height:150px">
+            <div ng-hide="disableQuery" style="width:100%; height:150px;" class="gridStyle" ng-grid="supervisorGridOptions">
+            </div>
+            <center><div ng-show="disableQuery" style="width:60%; padding-top:45px;"><img class="img-responsive" src="/polls/assets/img/loading.gif"></img></div></center>
+          </div><br/>
+        </tab>
+        <tab ng-if = "myRole === 'top-admin' || myRole === 'client-admin'" heading="Country" select="emptyLocationResults()">
+          <div style="height:150px">
+            <div ng-hide="disableQuery" style="width:100%; height:150px;" class="gridStyle" ng-grid="locationCountryGridOptions">
+            </div>
+            <center><div ng-show="disableQuery" style="width:60%; padding-top:45px;"><img class="img-responsive" src="/polls/assets/img/loading.gif"></img></div></center>
+          </div><br/>
+        </tab>
+      </tabset>
+      <!--
+      <button type="button" class="btn btn-info" ng-click="clearPollStats(activeTab)">Yesterday <i class="glyphicon glyphicon-pushpin"></i></button>
+      -->
+    </div>
+  </div>
+  <div class="row">
+    <div ng-if="queryPollStatsError" class="alert alert-danger alert-dismissible" role="alert"><center>{{queryPollStatsError}}!</center></div>
+    <div ng-if="infoMsg" class="alert alert-success" role="alert"><center>{{infoMsg}}</center></div>
+  </div>
+  <tabset>
+    <tab ng-if = "myRole === 'top-admin' || myRole === 'client-admin'" select="setActiveQuery(1)" heading="By Country">
+      <h4 ng-show="emptyResult">No results</h4>
+      <div ng-hide="emptyResult">
+        <ng-include src="'/polls/views/by-country.html'">
+      </div>
+    </tab>
+    <tab select="setActiveQuery(2)" heading="{{tab2Heading}}">
+      <h4 ng-show="emptyResult">No results</h4>
+      <div ng-hide="emptyResult">
+        <ng-include src="'/polls/views/by-country-questionnaire.html'">
+      </div>
+    </tab>
+    <tab select="setActiveQuery(3)" heading="{{tab3Heading}}">
+      <h4 ng-show="emptyResult">No results</h4>
+      <div ng-hide="emptyResult">
+        <ng-include src="'/polls/views/by-country-user.html'">
+      </div>
+    </tab>
+    <tab select="setActiveQuery(4)" heading="{{tab4Heading}}">
+      <h4 ng-show="emptyResult">No results</h4>
+      <div ng-hide="emptyResult">
+        <ng-include src="'/polls/views/by-country-user-questionnaire.html'">
+      </div>
+    </tab>
+    <tab select="setActiveQuery(5)" heading="Polls Location by User">
+      <ng-include src="'/polls/views/location-by-user.html'">
+    </tab>
+  </tabset>
+</section>

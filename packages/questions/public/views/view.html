@@ -1,0 +1,32 @@
+<section data-ng-controller="QuestionsController" data-ng-init="findOne()">
+  <h3 style="color:#666;">{{question.type}}</h3>
+  <span>{{question.created | date:'medium'}}</span> /
+  <span>{{question.user.name || 'USER NOT EXIST'}}</span>
+  <h2>{{question.title}}</h2>
+  <div ng-if="question.type === 'Question'">
+    <h3 style="color:#999;">({{question.kind}})</h3>
+    <div ng-show="question.required">
+      <span style="color:red;">Required</span>
+    </div>
+    <div ng-hide="question.required">
+      <span style="color:green;">Non Required</span>
+    </div>
+    <div ng-if="question.conditional.kind !== 'none'">
+      <span style="color:red;"><strong>Conditional - Kind: {{question.conditional.kind}} on Value: {{question.conditional.value}}</strong></span>
+    </div>
+  </div>
+  <h2>{{question.label}}</h2>
+  <ul>
+    <li ng-repeat="answer in question.content track by $index">
+      {{answer}}
+    </li>
+  </ul>
+  <div data-ng-if="hasAuthorization(question)">
+    <a class="btn" href="/#!/questions/{{question._id}}/edit">
+      <i class="glyphicon glyphicon-edit"></i>
+    </a>
+    <a class="btn" data-ng-click="remove(question);">
+      <i class="glyphicon glyphicon-trash"></i>
+    </a>
+  </div>
+</section>

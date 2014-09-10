@@ -1,0 +1,11 @@
+<section data-ng-controller="UsersController">
+  <div ng-if="myRole === 'top-admin' || myRole === 'client-admin'">
+    <ng-include src="'/users/views/admin-list.html'"></ng-include>
+  </div>
+  <div ng-if="myRole === 'manager'">
+    <ng-include src="'/users/views/manager-list.html'"></ng-include>
+  </div>
+  <div ng-if="myRole === 'supervisor'">
+    <ng-include src="'/users/views/supervisor-list.html'"></ng-include>
+  </div>
+</section>

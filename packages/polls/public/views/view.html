@@ -1,0 +1,20 @@
+<section data-ng-controller="PollsController" data-ng-init="findOne()">
+  <span>{{poll.created | date:'medium'}}</span> /
+  <span>{{poll.user.name || 'USER NOT EXIST'}}</span>
+  <h2>
+    <a data-ng-href="#!/questionnaires/{{poll.questionnaire._id}}">{{poll.questionnaire.title}}</a>
+  </h2>
+  <h4>
+    <div ng-repeat="answer in poll.answers track by $index">
+      {{answer}}
+    </div>
+    <span data-ng-if="hasAuthorization(poll)">
+      <a class="btn" href="/#!/polls/{{poll._id}}/edit">
+        <i class="glyphicon glyphicon-edit"></i>
+      </a>
+      <a class="btn" data-ng-click="remove(poll);">
+        <i class="glyphicon glyphicon-trash"></i>
+      </a>
+    </span>
+  </h4>
+</section>

@@ -1,0 +1,11 @@
+<section>
+  <div ng-if="myRole === 'top-admin' || myRole === 'client-admin'">
+    <ng-include src="'/polls/views/admin-by-country-questionnaire.html'"></ng-include>
+  </div>
+  <div ng-if="myRole === 'manager'">
+    <ng-include src="'/polls/views/manager-by-country-questionnaire.html'"></ng-include>
+  </div>
+  <div ng-if="myRole === 'supervisor'">
+    <ng-include src="'/polls/views/supervisor-by-country-questionnaire.html'"></ng-include>
+  </div>
+</section>

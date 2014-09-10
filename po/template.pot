@@ -1,0 +1,16 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: packages/questions/public/views/list.html
+msgid "Create One"
+msgstr ""
+
+#: packages/questions/public/views/list.html
+msgid "What?"
+msgstr ""
+
+#: packages/questions/public/views/list.html
+msgid "{{question.title}}"
+msgstr ""

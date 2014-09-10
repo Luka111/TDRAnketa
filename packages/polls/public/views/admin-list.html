@@ -1,0 +1,91 @@
+<section data-ng-init="findPollsAndQuestionnaires()">
+  <div class="col-md-4">
+    <h1>Find polls by criteria:</h1>
+    <hr style="border-bottom:1px solid #999;"/>
+    <button class="btn btn-success" ng-click="findAndClearCriteria()">All polls</button>
+    <hr style="border-bottom:1px solid #999;"/>
+    <!-- QUESTIONNAIRE CRITERIA -->
+    <h4>
+      <span>Questionnaire:</span>
+      <a ng-show="criteria.questionnaire !== null" class="btn" data-ng-click="removeCriteria('questionnaire')" style="color:red;">
+        <i class="glyphicon glyphicon-remove"></i>
+      </a>
+    </h4>
+    <select class="btn btn-default" ng-model="criteria.questionnaire" ng-options="value._id as value.title for value in allQuestionnaires" ng-change="pollsQuery()">
+    </select>
+    <!-- USERS CRITERIA -->
+    <h4>
+      <span>Users:</span>
+      <a ng-show="criteria.user !== null" class="btn" data-ng-click="removeCriteria('user')" style="color:red;">
+        <i class="glyphicon glyphicon-remove"></i>
+      </a>
+    </h4>
+    <select class="btn btn-default" ng-model="criteria.user" ng-options="value.user._id as value.user.username for value in distinctUsers" ng-change="pollsQuery()">
+    </select>
+    <!-- LANGUAGE CRITERIA -->
+    <h4>
+      <span>Language:</span>
+      <a ng-show="criteria.questionnaireLanguage !== null" class="btn" data-ng-click="removeCriteria('questionnaireLanguage')" style="color:red;">
+        <i class="glyphicon glyphicon-remove"></i>
+      </a>
+    </h4>
+    <select class="btn btn-default" ng-model="criteria.questionnaireLanguage" ng-options="value for value in languageShortcodeArray" ng-change="pollsQuery()">
+    </select>
+    <!-- DATE FROM CRITERIA -->
+    <h4>
+      <span>Date:</span><br/>
+      <span style="color:#666;">When you choose 'Date From' you will get polls for that day. Then you will get an option to select 'Date To' and find polls in date range.</span><br/>
+      <a class="btn" ng-show="criteria.dateFrom !== null" data-ng-click="removeCriteria('dateFrom')" style="color:red;">
+        <i class="glyphicon glyphicon-remove"></i>
+      </a>
+    </h4>
+    <p class="input-group">
+      <input type="text" class="form-control" datepicker-popup="dd-MMMM-yyyy" ng-model="criteria.dateFrom" is-open="opened1" min-date="null" max-date="'2015-06-22'" datepicker-options="dateOptions" close-text="Close" show-button-bar="false" ng-change="pollsQueryAndSelect()" placeholder="Date from" />
+      <span class="input-group-btn">
+        <button type="button" class="btn btn-default" ng-click="open1($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+      </span>
+    </p>
+    <!-- DATE TO CRITERIA -->
+    <div ng-show="dateFromSelected">
+      <h4>
+        <a class="btn" ng-show="criteria.dateTo !== null" data-ng-click="removeCriteria('dateTo')" style="color:red;">
+          <i class="glyphicon glyphicon-remove"></i>
+        </a>
+      </h4>
+      <p class="input-group">
+        <input type="text" class="form-control" datepicker-popup="dd-MMMM-yyyy" ng-model="criteria.dateTo" is-open="opened2" min-date="null" max-date="'2015-06-22'" datepicker-options="dateOptions" close-text="Close" show-button-bar="false" ng-change="pollsQuery()" placeholder="Date to"/>
+        <span class="input-group-btn">
+          <button type="button" class="btn btn-default" ng-click="open2($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+        </span>
+      </p>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <h1>Results:</h1>
+    <ul class="polls unstyled">
+      <li data-ng-repeat="poll in polls" style="border-bottom:1px solid orange; margin-bottom:10px; width:50%;">
+        <span>{{poll.created | date:'medium'}}</span> /
+        <span>{{poll.user.name || 'USER NOT EXIST'}}</span>
+        <h2>
+          <a data-ng-href="#!/questionnaires/{{poll.questionnaire._id}}">{{poll.questionnaire.title}}</a>
+        </h2>
+        <h4>
+          <div ng-repeat="answer in poll.answers track by $index">
+            {{answer}}
+          </div>
+          <span data-ng-if="hasAuthorization(poll)">
+            <a class="btn" href="#!/polls/{{poll._id}}">
+              <i class="glyphicon glyphicon-search"></i>
+            </a>
+            <a class="btn" href="#!/polls/{{poll._id}}/edit">
+              <i class="glyphicon glyphicon-edit"></i>
+            </a>
+            <a class="btn" data-ng-click="remove(poll);">
+              <i class="glyphicon glyphicon-trash"></i>
+            </a>
+          </span>
+        </h4>
+      </li>
+    </ul>
+  </div>
+</section>

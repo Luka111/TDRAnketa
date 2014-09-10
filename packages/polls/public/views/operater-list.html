@@ -1,0 +1,17 @@
+<section data-ng-init="findMyPolls()">
+  <div class="light-box">
+    <h1 class="equal-padding">My polls for today:</h1>
+    <div class="box" data-ng-repeat="poll in polls">
+      <span>{{poll.created | date:'medium'}}</span> /
+      <h2>
+        <span>{{poll.questionnaire.title}}</span>
+      </h2>
+      <h4>
+        <div ng-repeat="answer in poll.answers track by $index">
+          <span ng-if="answer.answer">{{answer.title}} - <strong style="color:#428bca;">{{answer.answer}}</strong></span>
+          <span ng-if="!answer.answer">{{answer.title}} - <strong>N/A</strong></span>
+        </div>
+      </h4>
+    </div>
+  </div>
+</section>
