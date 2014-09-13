@@ -78,6 +78,7 @@ module.exports = function(app, passport, db) {
   // Express/Mongo session storage
   app.use(session({
     secret: config.sessionSecret,
+    //headerKey: 'hersauthkey',
     headerKey: 'cookie',
     store: new mongoStore({
       db: db.connection.db,

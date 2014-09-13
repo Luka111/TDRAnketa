@@ -7,6 +7,7 @@ module.exports = function(System, app, auth, database) {
   app.route('/admin/menu')
     .get(function(req, res) {
       var roles = req.user ? req.user.roles : ['anonymous'];
+      console.log('--------------------- ZA MENI SAM DOBIO OVOG USERA',req.user);
       var items = mean.menus.get({
         roles: roles
       });

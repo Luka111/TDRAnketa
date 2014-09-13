@@ -12,7 +12,7 @@
       <h1>{{questionnaire.title}}</h1>
       -->
       <ul class="pagination">
-        <li ng-repeat="slide in questionnaire.content track by $index" ng-class="{'active': $index === slideIndex}"><span>{{$index + 1}}</span></li>
+        <li ng-repeat="slide in questionnaire.content track by $index" ng-class="{'active': $index === slideIndex}" ng-click="changeSlide($index)"><span>{{$index + 1}}</span></li>
       </ul>
       <div class="progress">
         <div class="progress-bar" role="progressbar" aria-valuenow="{{completedPercent}}" aria-valuemin="0" aria-valuemax="100" ng-style="completedPercentStyle">
@@ -81,10 +81,8 @@
                 </div>
 
                 <div ng-switch-when="Image">
-                  <div style="width:100%" class="img-responsive">
-                    <a ng-href="/packages/system/public/media/{{question.src}}" data-lightbox="tdr-anketa">
-                      <button type="button" class="btn btn-success" ng-disabled="question.disabled" ng-click="calculateCounter(question,form)"><i class="glyphicon big-icon glyphicon-picture"></i></button>
-                    </a>
+                  <div style="width:100%" class="img-responsive" ng-click="calculateCounter(question,form)">
+                    <questionimage disabled="question.disabled" ng-href="/packages/system/public/media/{{question.src}}" data-lightbox="tdr-anketa"/>
                   </div>
                 </div>
                 <div ng-switch-when="Video">

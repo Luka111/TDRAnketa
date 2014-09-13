@@ -118,26 +118,18 @@ angular.module('mean.system').controller('HeaderController', ['$scope', '$rootSc
       }
     }
 
-    queryMenuNoParams();
-
-    addRoleClassToBody();
-
     $scope.isCollapsed = false;
 
-    $rootScope.$on('loggedin', function() {
-
+    function executeOnLoggedIn(){
+      console.log('SACU DA QUERY MENU');
       queryMenu('main', defaultMainMenu);
-
+      addRoleClassToBody();
       queryMenuNoParams();
-
       if (!!$rootScope.user){
-
         console.log($rootScope.user.roles[1],jQuery('body'));
-
         jQuery('body').addClass($rootScope.user.roles[1]);
-      
         $scope.global = {
-          authenticated: !! $rootScope.user,
+          authenticated: $rootScope.user.roles[1] !== '',
           user: $rootScope.user,
           isTopAdmin : $rootScope.user.roles.indexOf('top-admin') !== -1,
           isClientAdmin : $rootScope.user.roles.indexOf('client-admin') !== -1,
@@ -145,10 +137,12 @@ angular.module('mean.system').controller('HeaderController', ['$scope', '$rootSc
           isSupervisor : $rootScope.user.roles.indexOf('supervisor') !== -1,
           isOperater : $rootScope.user.roles.indexOf('operater') !== -1
         };
-
       }
+    }
 
-    });
+    executeOnLoggedIn();
+
+    $rootScope.$on('loggedin', executeOnLoggedIn);
 
   }
 ]);

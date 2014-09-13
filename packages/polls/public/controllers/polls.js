@@ -577,6 +577,13 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
         if (!!ifNoQuestion) addToLoadedForms();
       }
     };
+    //Change slide
+    $scope.changeSlide = function(index){
+      if (index >= $scope.loadedForms.length){
+        return;
+      }
+      $scope.slideIndex = index;
+    };
 
     //Remove answer, only if the question is not required
     $scope.removeAnswer = function(question){
@@ -705,8 +712,29 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
       };
     }
 
-    $scope.countryGraphConfig = createGraphConfig('Polls by country');
-    $scope.countryQuestionnaireGraphConfig = createGraphConfig('Polls by country/questionnaire');
+    function createGraphData(results, group, conditionalField, conditionalValue){
+      var countryGraphData = {
+        series: [],
+        data: []
+      };
+      for (var i=0; i<results.length; i++){
+        var conditional = true;
+        if (!!conditionalField && !!conditionalValue){
+          if(results[i][conditionalField] !== conditionalValue) conditional = false;
+        }
+        if(!!conditional){
+          countryGraphData.series.push(results[i][group]);
+          var dataObj = {
+            x : '',
+            y : []
+          };
+          dataObj.x = results[i][group];
+          dataObj.y.push(results[i].total);
+          countryGraphData.data.push(dataObj);
+        }
+      }
+      return countryGraphData;
+    }
 
     function processByCountry(pollstats){
       var ret = [];
@@ -722,21 +750,11 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
       $scope.countryGridOptions = {
         data : 'results',
       };
-      $scope.countryGraphData = {
-        series: [],
-        data: []
-      };
-      for (i=0; i<$scope.results.length; i++){
-        $scope.countryGraphData.series.push($scope.results[i].country);
-        var dataObj = {
-          x : '',
-          y : []
-        };
-        dataObj.x = $scope.results[i].country;
-        dataObj.y.push($scope.results[i].total);
-        $scope.countryGraphData.data.push(dataObj);
-      }
+      $scope.countryGraphConfig = createGraphConfig('Polls by country');
+      $scope.countryGraphData = createGraphData($scope.results,'country');
     }
+
+    $scope.pointer = {};
 
     function processByQuestionnaire(pollstats){ //possible leading country, check role
       var ret = [];
@@ -761,11 +779,31 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
           {field: 'total'}
         ]
       };
-      $scope.countryQuestionnaireGraphData = {
-        series: [],
-        data: []
-      };
+      $scope.countryQuestionnaireGraphConfig = createGraphConfig('Polls by questionnaire');
+      $scope.countryResults = makeDataArrayFromResults('country');
+      $scope.pointer.currentlySelected = $scope.countryResults[0];
+      if (!!$scope.pointer.currentlySelected){
+        $scope.drawPie($scope.pointer.currentlySelected);
+      }
     }
+
+    function makeDataArrayFromResults(field){
+      var dataArray = [];
+      for (var i=0; i<$scope.results.length; i++){
+        if (dataArray.length === 0){
+          dataArray.push($scope.results[i][field]);
+          continue;
+        }
+        if (dataArray.indexOf($scope.results[i][field]) === -1){
+          dataArray.push($scope.results[i][field]);
+        }
+      }
+      return dataArray;
+    }
+
+    $scope.drawPie = function(country){
+      $scope.countryQuestionnaireGraphData = createGraphData($scope.results, 'questionnaire', 'country', country);
+    };
 
     function processByUser(pollstats){ //possible leading country, check role
       var ret = [];

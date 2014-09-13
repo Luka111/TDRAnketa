@@ -12,10 +12,10 @@ mean.serve({
         var string = 'CACHE MANIFEST\n';
         string += '/polls/assets/css/polls.css\n';
         string += '/system/translation/translations.js\n';
-        string += '/system/views/header.html\n';
-        string += '/system/views/index.html\n';
-        string += '/admin/menu\n';
-        string += '/system/views/admin-header.html\n';
+        //string += '/system/views/header.html\n';
+        //string += '/system/views/index.html\n';
+        //string += '/admin/menu\n';
+        //string += '/system/views/admin-header.html\n';
         string += 'NETWORK: \n';
         string += '/ \n';
         string += 'http://fonts.googleapi.com/\n';
