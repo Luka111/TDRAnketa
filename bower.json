@@ -17,7 +17,7 @@
     "openlayers": "openlayers/ol3#0c8f29c432",
     "proj4": "latest",
     "lightbox": "latest",
-    "ng-grid": "latest",
+    "ng-grid": "2.0.12",
     "angular-charts": "latest"
   }
 }
