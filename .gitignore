@@ -1,12 +1,15 @@
 .DS_Store
+*.swp
 .nodemonignore
 npm-debug.log
 .sass-cache/
 .bower-*/
 .idea/
 nbproject/
-node_modules/
-bower_components
+node_modules/*
+!node_modules/meanio/
+bower_components/*
+!bower_components/bootstrap-custom/
 mean.iml
 test/coverage/
 modules/public/

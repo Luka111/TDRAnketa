@@ -30,7 +30,7 @@ angular.module('mean.users').config(['$stateProvider',
       // Make an AJAX call to check if the user is logged in
       $http.get('/loggedin').success(function(user) {
         // Not admin 
-        if (user.roles.indexOf('top-admin') === -1) {
+        if (user === '0' || user.roles.indexOf('top-admin') === -1) {
           $timeout(deferred.reject);
           $location.url('/login');
         }
@@ -49,7 +49,7 @@ angular.module('mean.users').config(['$stateProvider',
       // Make an AJAX call to check if the user is logged in
       $http.get('/loggedin').success(function(user) {
         // Operater 
-        if (user.roles.indexOf('operater') !== -1) {
+        if (user === '0' || user.roles.indexOf('operater') !== -1) {
           $timeout(deferred.reject);
           $location.url('/login');
         }
@@ -68,7 +68,7 @@ angular.module('mean.users').config(['$stateProvider',
       // Make an AJAX call to check if the user is logged in
       $http.get('/loggedin').success(function(user) {
         // Not admin 
-        if (user.roles.indexOf('client-admin') !== -1) {
+        if (user === '0' || user.roles.indexOf('client-admin') !== -1) {
           $timeout(deferred.reject);
           $location.url('/login');
         }

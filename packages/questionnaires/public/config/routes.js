@@ -10,7 +10,7 @@ angular.module('mean.questionnaires').config(['$stateProvider',
       // Make an AJAX call to check if the user is logged in
       $http.get('/loggedin').success(function(user) {
         // Not manager
-        if (user.roles.indexOf('manager') === -1) {
+        if (user === '0' || user.roles.indexOf('manager') === -1) {
           $timeout(deferred.reject);
           $location.url('/login');
         }

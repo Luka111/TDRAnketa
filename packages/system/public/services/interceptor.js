@@ -1,13 +1,9 @@
 'use strict';
 
 angular.module('mean-factory-interceptor', [])
-  .factory('httpInterceptor', ['$q', '$location', 'identityTokenService',
-    function($q, $location, identityTokenService) {
+  .factory('httpInterceptor', ['$q', '$location',
+    function($q, $location) {
       return {
-        'request': function(config) {
-          config.headers[identityTokenService.tokenName()] = identityTokenService.getToken();
-          return config;
-        },
         'response': function(response) {
           /*
           if (response.status === 401) {
@@ -15,7 +11,6 @@ angular.module('mean-factory-interceptor', [])
             return $q.reject(response);
           }
           */
-          identityTokenService.setToken(response.headers('set-'+identityTokenService.tokenName()));
           return response || $q.when(response);
         },
 
