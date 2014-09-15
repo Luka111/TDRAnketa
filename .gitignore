@@ -10,6 +10,7 @@ node_modules/*
 !node_modules/meanio/
 bower_components/*
 !bower_components/bootstrap-custom/
+!bower_components/bootstrap/
 mean.iml
 test/coverage/
 modules/public/
