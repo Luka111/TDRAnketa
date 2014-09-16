@@ -31,6 +31,7 @@
           -->
           <h2 class="dark-box">
             <span translate>{{form.title}}</span>
+            <span>{{form.questionsCounter}}</span>
           </h2>
           <accordion close-others="true">
             <div ng-repeat="question in form.content track by $index" ng-if="question.src !== ''" class="box">
@@ -81,13 +82,13 @@
                 </div>
 
                 <div ng-switch-when="Image">
-                  <div style="width:100%" class="img-responsive" ng-click="calculateCounter(question,form)">
-                    <questionimage disabled="question.disabled" ng-href="/packages/system/public/media/{{question.src}}" data-lightbox="tdr-anketa"/>
+                  <div style="width:100%" class="img-responsive">
+                    <questionimage disabled="question.disabled" ng-click="calculateCounter(question,form)" ng-href="/packages/system/public/media/{{question.src}}" data-lightbox="tdr-anketa"/>
                   </div>
                 </div>
                 <div ng-switch-when="Video">
-                  <div style="width:100%" ng-click="calculateCounter(question,form)"  class="img-responsive">
-                    <questionvideo played="question.answeredIndicator" disabled="question.disabled" src='{{question.fullSrc}}' type='{{question.fileType}}'/>
+                  <div style="width:100%"  class="img-responsive">
+                    <questionvideo played="question.answeredIndicator" ng-click="calculateCounter(question,form)" disabled="question.disabled" src='{{question.fullSrc}}' type='{{question.fileType}}'/>
                   </div>
                 </div>
               </div>

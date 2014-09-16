@@ -109,6 +109,9 @@ angular.module('mean.users')
       function executeOnLoggedin(){
         $scope.myRole = $rootScope.user.roles[1];
         $scope.myLanguage = $rootScope.user.language;
+        if (!!findUsersByLangFailed){
+          $scope.findUsersByLang();
+        }
       }
 
       executeOnLoggedin();
@@ -128,7 +131,13 @@ angular.module('mean.users')
       };
 
       //Find users by language
+      var findUsersByLangFailed = false;
+
       $scope.findUsersByLang = function(){
+        if (!$scope.myLanguage){
+          findUsersByLangFailed = true;
+          return;
+        }
         UsersQuery.query({
           language: $scope.myLanguage
         },function(users){

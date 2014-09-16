@@ -100,6 +100,30 @@
                                 <h5>Conditional: <strong>{{question.conditional.kind}}</strong><span ng-if="!!question.conditional.value"> on value <strong>{{question.conditional.value}}</strong></span></h5>
                               </accordion-group>
                             </div>
+                            <div ng-if="question.type === 'Image'">
+                              <div class="img-responsive" ng-if="question.src">
+                                <img class="img-responsive" ng-src="/packages/system/public/media/{{question.src}}"/>
+                              </div>
+                              <div ng-hide="question.src">
+                                <h5>
+                                  <mean-upload file-dest="'/packages/system/public/media/'" upload-callback="" upload-file-callback="addFile(file,$index,form.content)"></mean-upload>
+                                </h5>
+                                <img class="img-responsive" style="margin-bottom:10px; border:1px solid #222;" ng-src="/packages/system/public/media/image-placeholder.png"/>
+                              </div>
+                            </div>
+                            <div ng-if="question.type === 'Video'">
+                              <div class="img-responsive" ng-if="question.src">
+                              <video controls>
+                                <source ng-src='{{question.fullSrc}}' type='{{question.fileType}}'>
+                              </video>
+                              </div>
+                              <div ng-hide="question.src">
+                                <h5>
+                                  <mean-upload file-dest="'/packages/system/public/media/'" upload-callback="" upload-file-callback="addFile(file,$index,form.content)"></mean-upload>
+                                </h5>
+                                <img class="img-responsive" style="margin-bottom:10px;" ng-src="/packages/system/public/media/video-placeholder.jpg"/>
+                              </div>
+                            </div>
                           </h2>
                         </li>
                       </accordion>

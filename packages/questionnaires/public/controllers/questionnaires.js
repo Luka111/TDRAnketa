@@ -13,6 +13,7 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
 
     function executeOnLoggedin(){
       $scope.myLanguage = $rootScope.user.language;
+      if (!!$scope.findFailed) $scope.find();
     }
 
     executeOnLoggedin();
@@ -103,28 +104,44 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
       }
     };
 
+    $scope.findFailed = false;
+
+    function onFind(questionnaires){
+      $scope.questionnaires = questionnaires;
+      //For displaying images and videos in listing
+      for (var i=0; i<$scope.questionnaires.length; i++){
+        var questionnaire = $scope.questionnaires[i];
+        fillSrcAttribute(questionnaire);
+      }
+    }
+
     $scope.find = function() {
+      if (!$rootScope.user.language){
+        $scope.findFailed = true;
+        return;
+      }
       queryQuestionnaires.query({
         language: $rootScope.user.language
-      },function(questionnaires) {
-        $scope.questionnaires = questionnaires;
-      });
+      },onFind);
     };
+
+    function onFindOne(questionnaire){
+      $scope.questionnaire = questionnaire;
+      console.log('DAJ DA GA VIDIM',$scope.questionnaire);
+      $scope.backgroundImageSrc = $scope.questionnaire.backgroundImage;
+      fillSrcAttribute(questionnaire);
+      $scope.readyCounter++;
+    }
 
     $scope.findOne = function() {
       Questionnaires.get({
         questionnaireId: $stateParams.questionnaireId
-      }, function(questionnaire) {
-        $scope.questionnaire = questionnaire;
-        $scope.backgroundImageSrc = $scope.questionnaire.backgroundImage;
-        fillSrcAttribute(questionnaire);
-        $scope.readyCounter++;
-      });
+      },onFindOne);
     };
     
     //Fill questions with src + fileType attribute 
     //THIS IS VERY IMPORTANT - in the database is written string that contains fileName + ' ' + fileType
-    var fillSrcAttribute = function(questionnaire){
+    function fillSrcAttribute(questionnaire){
       var imageCounter = 0,
         videoCounter = 0;
       for (var i=0; i<questionnaire.content.length; i++){
@@ -132,7 +149,8 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
         for (var j=0; j<form.content.length; j++){
           var question = form.content[j];
           if (question.type === 'Image'){
-            if (questionnaire.imageFiles[imageCounter] === ''){
+            var ifn = questionnaire.imageFiles[imageCounter].split(' ');
+            if (ifn[0] === '' || ifn[0] === 'undefined'){
               //Strange behavior from browser
               question.src = '';
             }else{
@@ -142,7 +160,8 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
             }
           }
           if (question.type === 'Video'){
-            if (questionnaire.videoFiles[videoCounter] === ''){
+            var vfn = questionnaire.videoFiles[videoCounter].split(' ');
+            if (vfn[0] === '' || vfn[0] === 'undefined'){
               //Strange behavior from browser
               question.src = '';
             }else{
@@ -155,7 +174,7 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
           }
         }
       }
-    };
+    }
     
     //Carousel fundamental
     /***
@@ -177,11 +196,13 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
     };
 
     //Form query
+    function findForms(forms){
+      $scope.forms = forms;
+      $scope.readyCounter++;
+    }
+
     $scope.findForms = function() {
-      Forms.query(function(forms) {
-        $scope.forms = forms;
-        $scope.readyCounter++;
-      });
+      Forms.query(findForms);
     };
 
     //Add form to content

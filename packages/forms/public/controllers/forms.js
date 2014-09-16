@@ -11,12 +11,14 @@ angular.module('mean.forms').controller('FormsController', ['$scope', '$rootScop
 
     $scope.content = [];
 
-    $scope.addQuestion = function(question,array){
-      var index = $scope.questions.indexOf(question);
+    $scope.addQuestion = function(question,array,index){
+      index = index || $scope.questions.indexOf(question);
+      console.log('INDEX BRE',index);
       $scope.contentMissing = false;
       if(question === null){
         if(index === -1){
           question = $scope.videoQuestion;
+          console.log('VIDEO JE BRE',question);
         }else{
           if(index === -2){
             question = $scope.imageQuestion;
