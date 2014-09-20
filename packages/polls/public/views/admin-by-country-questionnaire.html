@@ -10,7 +10,7 @@
       <div ng-if="activeTab === 2 && results.length > 0" class="row">
         <div class="col-md-6">
           <span>Choose country</span>
-          <select class="btn btn-default" ng-model="pointer.currentlySelected" ng-options="value for value in countryResults" ng-change="drawPie(pointer.currentlySelected)">
+          <select class="btn btn-default" ng-model="pointer.currentlySelected" ng-options="value for value in countryResults" ng-change="drawPie([pointer.currentlySelected],'questionnaire','countryQuestionnaireGraphData',['country'])">
           </select>
         </div>
       </div>

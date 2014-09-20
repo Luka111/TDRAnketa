@@ -17,7 +17,9 @@ angular.module('mean-factory-interceptor', [])
         'responseError': function(rejection) {
 
           if (rejection.status === 401) {
-            $location.url('/auth/login');
+            //$location.url('/auth/login');
+            //No login page implemented because login is on the home page
+            $location.url('/');
             return $q.reject(rejection);
           }
           return $q.reject(rejection);

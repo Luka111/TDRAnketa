@@ -242,7 +242,8 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
         for (var j=0; j<form.content.length; j++){
           var question = form.content[j];
           if (question.type === 'Image'){
-            if (poll.imageFiles[imageCounter] === ''){
+            var ifn = poll.imageFiles[imageCounter].split(' ');
+            if (ifn[0] === '' || ifn[0] === 'undefined'){
               //Strange behavior from browser
               question.src = '';
             }else{
@@ -252,7 +253,8 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
             }
           }
           if (question.type === 'Video'){
-            if (poll.videoFiles[videoCounter] === ''){
+            var vfn = poll.videoFiles[videoCounter].split(' ');
+            if (vfn[0] === '' || vfn[0] === 'undefined'){
               //Strange behavior from browser
               question.src = '';
             }else{
@@ -712,15 +714,19 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
       };
     }
 
-    function createGraphData(results, group, conditionalField, conditionalValue){
+    function createGraphData(results, group, conditionalFieldArray, conditionalValueArray){
       var countryGraphData = {
         series: [],
         data: []
       };
       for (var i=0; i<results.length; i++){
         var conditional = true;
-        if (!!conditionalField && !!conditionalValue){
-          if(results[i][conditionalField] !== conditionalValue) conditional = false;
+        if (!!conditionalFieldArray && !!conditionalValueArray){
+          for (var j=0; j<conditionalFieldArray.length; j++){
+            var conditionalField = conditionalFieldArray[j];
+            var conditionalValue = conditionalValueArray[j];
+            if(results[i][conditionalField] !== conditionalValue) conditional = false;
+          }
         }
         if(!!conditional){
           countryGraphData.series.push(results[i][group]);
@@ -751,7 +757,7 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
         data : 'results',
       };
       $scope.countryGraphConfig = createGraphConfig('Polls by country');
-      $scope.countryGraphData = createGraphData($scope.results,'country');
+      $scope.drawPie(null,'country','countryGraphData',null);
     }
 
     $scope.pointer = {};
@@ -768,7 +774,8 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
         });
       }
       $scope.results = ret;
-      var groupArray = ($scope.myRole === 'top-admin' || $scope.myRole === 'client-admin') ? ['country'] : [];
+      var isAdmin = $scope.myRole === 'top-admin' || $scope.myRole === 'client-admin';
+      var groupArray = (isAdmin) ? ['country'] : [];
       $scope.countryQuestionnaireGridOptions = {
         data : 'results',
         groups : groupArray,
@@ -780,29 +787,41 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
         ]
       };
       $scope.countryQuestionnaireGraphConfig = createGraphConfig('Polls by questionnaire');
-      $scope.countryResults = makeDataArrayFromResults('country');
-      $scope.pointer.currentlySelected = $scope.countryResults[0];
+      if (!!isAdmin){
+        $scope.countryResults = makeDataArrayFromResults('country');
+        $scope.pointer.currentlySelected = $scope.countryResults[0];
+      }else{
+        $scope.pointer.currentlySelected = $scope.myLanguage;
+      }
       if (!!$scope.pointer.currentlySelected){
-        $scope.drawPie($scope.pointer.currentlySelected);
+        $scope.drawPie([$scope.pointer.currentlySelected],'questionnaire','countryQuestionnaireGraphData',['country']);
       }
     }
 
-    function makeDataArrayFromResults(field){
+    function makeDataArrayFromResults(field,conditionalFieldArray,conditionalValueArray){
       var dataArray = [];
       for (var i=0; i<$scope.results.length; i++){
-        if (dataArray.length === 0){
+        var conditional = true;
+        if (!!conditionalFieldArray && !!conditionalValueArray){
+          for (var j=0; j<conditionalFieldArray.length; j++){
+            var conditionalField = conditionalFieldArray[j];
+            var conditionalValue = conditionalValueArray[j];
+            if($scope.results[i][conditionalField] !== conditionalValue) conditional = false;
+          }
+        }
+        if (dataArray.length === 0 && !!conditional){
           dataArray.push($scope.results[i][field]);
           continue;
         }
-        if (dataArray.indexOf($scope.results[i][field]) === -1){
+        if (dataArray.indexOf($scope.results[i][field]) === -1 && !!conditional){
           dataArray.push($scope.results[i][field]);
         }
       }
       return dataArray;
     }
 
-    $scope.drawPie = function(country){
-      $scope.countryQuestionnaireGraphData = createGraphData($scope.results, 'questionnaire', 'country', country);
+    $scope.drawPie = function(country,group,scopeProp,conditionalField){
+      $scope[scopeProp] = createGraphData($scope.results, group, conditionalField, country);
     };
 
     function processByUser(pollstats){ //possible leading country, check role
@@ -817,7 +836,8 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
         });
       }
       $scope.results = ret;
-      var groupArray = ($scope.myRole === 'top-admin' || $scope.myRole === 'client-admin') ? ['country'] : [];
+      var isAdmin = $scope.myRole === 'top-admin' || $scope.myRole === 'client-admin';
+      var groupArray = (isAdmin) ? ['country'] : [];
       $scope.countryUserGridOptions= {
         data : 'results',
         groups : groupArray,
@@ -828,6 +848,16 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
           {field: 'total'}
         ]
       };
+      $scope.countryUserGraphConfig = createGraphConfig('Polls by user');
+      if (!!isAdmin){
+        $scope.countryResults = makeDataArrayFromResults('country');
+        $scope.pointer.currentlySelected = $scope.countryResults[0];
+      }else{
+        $scope.pointer.currentlySelected = $scope.myLanguage;
+      }
+      if (!!$scope.pointer.currentlySelected){
+        $scope.drawPie([$scope.pointer.currentlySelected],'user','countryUserGraphData',['country']);
+      }
     }
 
     function processByUserQuestionnaire(pollstats){ //possible leading country, check role
@@ -843,7 +873,8 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
         });
       }
       $scope.results = ret;
-      var groupArray = ($scope.myRole === 'top-admin' || $scope.myRole === 'client-admin') ? ['country','user'] : ['user'];
+      var isAdmin = $scope.myRole === 'top-admin' || $scope.myRole === 'client-admin';
+      var groupArray = (isAdmin) ? ['country','user'] : ['user'];
       $scope.countryUserQuestionnaireGridOptions= {
         data : 'results',
         groups : groupArray,
@@ -855,7 +886,25 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
           {field: 'total'}
         ]
       };
+      $scope.countryUserQuestionnaireGraphConfig = createGraphConfig('Polls by questionnaire');
+      if (!!isAdmin){
+        $scope.countryResults = makeDataArrayFromResults('country');
+        $scope.pointer.currentlySelected = $scope.countryResults[0];
+      }else{
+        $scope.pointer.currentlySelected = $scope.myLanguage;
+      }
+      $scope.userResults = makeDataArrayFromResults('user',['country'],[$scope.pointer.currentlySelected]);
+      $scope.pointer.currentlySelected2 = $scope.userResults[0];
+      if (!!$scope.pointer.currentlySelected){
+        $scope.drawPie([$scope.pointer.currentlySelected,$scope.pointer.currentlySelected2],'questionnaire','countryUserQuestionnaireGraphData',['country','user']);
+      }
     }
+
+    $scope.createUserResults = function(){
+        $scope.userResults = makeDataArrayFromResults('user',['country'],[$scope.pointer.currentlySelected]);
+        $scope.pointer.currentlySelected2 = $scope.userResults[0];
+        $scope.drawPie([$scope.pointer.currentlySelected,$scope.pointer.currentlySelected2],'questionnaire','countryUserQuestionnaireGraphData',['country','user']);
+    };
 
     $scope.locationQueryResults = [];
 
@@ -1138,35 +1187,6 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
       }
     }
 
-    /* PROMASAJ
-    $scope.clearPollStats = function(){
-      if ($scope.dateFromCriteria === truncDay(new Date(new Date() - 24*60*60*1000)) && $scope.dateToCriteria === truncDay(new Date())) return;
-      $scope.dateFromCriteria = truncDay(new Date(new Date() - 24*60*60*1000));
-      $scope.stats.dateFrom = $scope.dateFromCriteria;
-      $scope.dateToCriteria = truncDay(new Date());
-      $scope.stats.dateTo = $scope.dateToCriteria;
-      if ($scope.activeTab === 5 && isObjectSizeZero($scope.stats.users) && isObjectSizeZero($scope.stats.countryOptions)) return;
-      $scope.queryPollStatsError = null; 
-      $scope.queryObj = {
-        q : $scope.activeTab,
-        dateFrom : $scope.dateFromCriteria,
-        dateTo : $scope.dateToCriteria
-      };
-      if (!isObjectSizeZero($scope.stats.users)){
-        if (!makeUsersArray()) return;
-      }
-      if (!isObjectSizeZero($scope.stats.countryOptions)){
-        var countryOptions = [];
-        for (var i in $scope.stats.countryOptions){
-          countryOptions.push($scope.stats.countryOptions[i]);
-        }
-        $scope.queryObj.countryArray = countryOptions;
-      }
-      $scope.infoMsg = 'Displaying results between ' + $scope.dateFromCriteria + ' and ' + $scope.dateToCriteria;
-      queryPollStats($scope.queryObj,false);
-    };
-    */
-
     function makeLanguageArrayOfObj(shortcodes){
       shortcodes = shortcodes || $scope.languageShortcodeArray; 
       console.log('shortcodes',shortcodes);
@@ -1230,8 +1250,25 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
     //$scope.distinctUsersGridOptions = locationGridOptionsFactory('distinctUsers','distinctUsersGridOptions','user');
     //$scope.supervisorGridOptions = locationGridOptionsFactory('distinctSupervisors','supervisorGridOptions','supervisor');
 
+    function purge(){
+      if (!!$scope.countryGraphData) $scope.countryGraphData = null;
+      if (!!$scope.countryGraphConfig) $scope.countryGraphConfig = null;
+      if (!!$scope.countryGridOptions) $scope.countryGridOptions= null;
+      if (!!$scope.countryQuestionnaireGraphData) $scope.countryQuestionnaireGraphData = null;
+      if (!!$scope.countryQuestionnaireGraphConfig) $scope.countryQuestionnaireGraphData = null;
+      if (!!$scope.countryQuestionnaireGridOptions) $scope.countryQuestionnaireGridOptions = null;
+      if (!!$scope.countryUserGraphData) $scope.countryUserGraphData = null;
+      if (!!$scope.countryUserGraphConfig) $scope.countryUserGraphConfig = null;
+      if (!!$scope.countryUserGridOptions) $scope.countryUserGridOptions = null;
+      if (!!$scope.countryUserQuestionnaireGraphData) $scope.countryUserQuestionnaireGraphData = null;
+      if (!!$scope.countryUserQuestionnaireGraphConfig) $scope.countryUserQuestionnaireGraphConfig = null;
+      if (!!$scope.countryUserQuestionnaireGridOptions) $scope.countryUserQuestionnaireGridOptions = null;
+    }
+
     $scope.setActiveQuery = function(qindex){
       $scope.disableQuery = true;
+      //clear everything we can
+      purge();
       if (!$scope.dateFromCriteria) $scope.dateFromCriteria = truncDay(new Date(new Date() - 24*60*60*1000));
       if (!$scope.dateToCriteria) $scope.dateToCriteria = truncDay(new Date());
       $scope.emptyResult = false;

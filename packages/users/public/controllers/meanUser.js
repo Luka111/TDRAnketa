@@ -15,7 +15,6 @@ angular.module('mean.users')
       */
 
       // Register the login() function
-      // Register the login() function
       $scope.login = function() {
         $http.post('/login', {
           username: $scope.user.username,
@@ -34,67 +33,83 @@ angular.module('mean.users')
       };
     }
   ])
-  .controller('RegisterCtrl', ['$scope', '$rootScope', '$http', '$location', 'Global',
-    function($scope, $rootScope, $http, $location, Global) {
-      $scope.user = {};
+  .controller('RegisterCtrl', ['$scope', '$rootScope', '$http', '$location', 'Global', 'identityService',
+    function($scope, $rootScope, $http, $location, Global, identityService) {
       $scope.global = Global;
-      //ONLY 1 ROLE (+ authenticated at 0)
-      $scope.myRole = $rootScope.user.roles[1];
+      $scope.languageShortcodeArray = $scope.global.languageShortcodes;
+      $scope.user = {};
+      //*
+      function executeOnLoggedin(){
+        //ONLY 1 ROLE (+ authenticated at 0)
+        console.log('A CEKAJ MALO?',$rootScope.user);
+        $scope.myRole = $rootScope.user.roles[1];
+        $scope.user.role = chooseUserRole();
+        $scope.user.language = ($rootScope.user.language === 'all') ? $scope.languageShortcodeArray[0] :  $rootScope.user.language;
+      }
+
+      executeOnLoggedin();
+
+      $rootScope.$on('loggedin', executeOnLoggedin);
+      //
+
       //Default operater
-      var chooseUserRole = function(){
+      function chooseUserRole(){
         if ($scope.myRole === 'top-admin') return 'manager';
         if ($scope.myRole === 'manager') return 'supervisor';
         if ($scope.myRole === 'supervisor') return 'operater';
-      };
-      $scope.user.role = chooseUserRole();
+      }
       $scope.userRoles = ['client-admin','manager'];
-      $scope.languageShortcodeArray = $scope.global.languageShortcodes;
-      $scope.user.language = ($rootScope.user.language === 'all') ? $scope.languageShortcodeArray[0] :  $rootScope.user.language;
       
-      $scope.register = function() {
-        $scope.usernameError = null;
-        $scope.registerError = null;
-        $http.post('/register', {
-          email: $scope.user.email,
-          password: $scope.user.password,
-          confirmPassword: $scope.user.confirmPassword,
-          username: $scope.user.username,
-          name: $scope.user.name,
-          roles: $scope.user.role,
-          myCreator: $rootScope.user._id,
-          language: $scope.user.language
-        })
-          .success(function(userId) {
-            // authentication OK
-            if ($scope.myRole === 'supervisor'){
-              var operaterId = JSON.parse(userId);
-              $http.post('/insertOperater',{
-                supervisorId : $rootScope.user._id,
-                operaterId : operaterId
-              })
-                .success(function(insertedOId){
-                  console.log('Successfuly inserted this operater',insertedOId);
-                  $rootScope.user.operaters.push(JSON.parse(insertedOId));
-                })
-                .error(function(error){
-                  console.log('Failed to insert operater. Error:',error);
-                });
-            }
-            $scope.registerError = 0;
-            //$rootScope.user = $scope.user;
-            //$rootScope.$emit('loggedin');
-            $location.url('/users');
-            console.log($rootScope.user);
+      $scope.register = function(valid) {
+        var customValidation = 
+          (!$scope.user.password ? false : $scope.user.password.length >= 8) &&
+          ($scope.user.password === $scope.user.confirmPassword);
+        if (!!valid && customValidation){
+          $scope.usernameError = null;
+          $scope.registerError = null;
+          $http.post('/register', {
+            email: $scope.user.email,
+            password: $scope.user.password,
+            confirmPassword: $scope.user.confirmPassword,
+            username: $scope.user.username,
+            name: $scope.user.name,
+            roles: $scope.user.role,
+            myCreator: $rootScope.user._id,
+            language: $scope.user.language
           })
-          .error(function(error) {
-            // Error: authentication failed
-            console.log('TU SAM BRE');
-            if (error === 'Username already taken') {
-              $scope.usernameError = error;
-            } else if (error === 'Email already taken') {
-              $scope.emailError = error;
-            } else $scope.registerError = error;
-          });
+            .success(function(userId) {
+              // authentication OK
+              if ($scope.myRole === 'supervisor'){
+                var operaterId = JSON.parse(userId);
+                $http.post('/insertOperater',{
+                  supervisorId : $rootScope.user._id,
+                  operaterId : operaterId
+                })
+                  .success(function(insertedOId){
+                    console.log('Successfuly inserted this operater',insertedOId);
+                    $rootScope.user.operaters.push(JSON.parse(insertedOId));
+                  })
+                  .error(function(error){
+                    console.log('Failed to insert operater. Error:',error);
+                  });
+              }
+              $scope.registerError = 0;
+              //$rootScope.user = $scope.user;
+              //$rootScope.$emit('loggedin');
+              $location.url('/users');
+              console.log($rootScope.user);
+            })
+            .error(function(error) {
+              // Error: authentication failed
+              if (error === 'Username already taken') {
+                $scope.usernameError = error;
+              } else if (error === 'Email already taken') {
+                $scope.emailError = error;
+              } else $scope.registerError = error;
+            });
+        }else{
+          $scope.submitted = true;
+        }
       };
     }
   ])

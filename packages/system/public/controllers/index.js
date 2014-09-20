@@ -20,7 +20,9 @@ angular.module('mean.system').controller('IndexController', ['$scope', '$rootSco
 
     function MediaStorage(){
       this.store = {};
+      localStorage.setItem('bla','truc');
       for(var i in localStorage){
+        //alert('loading from localStorage '+i);
         this.loadBlob(i);
       }
       console.log('my store',this.store);
@@ -30,6 +32,7 @@ angular.module('mean.system').controller('IndexController', ['$scope', '$rootSco
       if(m){
         this.putMediaToElement(mediaelementid,m);
       }else{
+        //alert(JSON.stringify(this.store));
         console.log('gotta load',mediaurl);
         this.loadURL(mediaurl,this.putMediaToElement.bind(this,mediaelementid));
       }
@@ -42,40 +45,47 @@ angular.module('mean.system').controller('IndexController', ['$scope', '$rootSco
       $http.get(mediaurl,{responseType:'blob'}).success(this.onURLLoaded.bind(this,mediaurl,cb));
     };
     MediaStorage.prototype.onURLLoaded = function(mediaurl,cb,data){
-      console.log('got data',data);
-      this.saveBlob(mediaurl,data);
+      //console.log('got data',data);
       var urlobj = URL.createObjectURL(data);
       this.store[mediaurl] = urlobj;
       cb(urlobj);
+      this.saveBlob(mediaurl,data);
+      data = null;
     };
     MediaStorage.prototype.saveBlob = function(id,blob){
       var fr = new FileReader();
-      fr.onload = this.onFileRead.bind(this,id,fr,blob.type);
-      fr.readAsArrayBuffer(blob);
+      fr.onload = this.onFileReadToBinary.bind(this,id,fr,blob.type);
+      fr.readAsBinaryString(blob);
     };
-    MediaStorage.prototype.onFileRead = function(id,filereader,type){
-      var uint8bytes = new Uint8Array(filereader.result);
-      var data = '';
-      for(var i in uint8bytes){
-        data += String.fromCharCode(uint8bytes[i]);
+    MediaStorage.prototype.onFileReadToBinary = function(id,filereader,type){
+      try{
+        var bd = btoa(filereader.result);
+        //alert(bd.length);
+        filereader = null;
+        localStorage.setItem('media:'+id,JSON.stringify({type:type,data:bd}));
       }
-      localStorage.setItem('media:'+id,JSON.stringify({type:type,data:btoa(data)}));
+      catch(e){
+        //alert(e);
+      }
     };
     MediaStorage.prototype.loadBlob = function(id){
       var key = this.keyFromMediaKey(id);
       if(!key){
         return;
       }
-      var mediastring = localStorage.getItem(id);
       try{
+        var mediastring = localStorage.getItem(id);
         var media = JSON.parse(mediastring);
-        console.log(media);
-        var bytes = atob(media.data);
-        var uint8bytes = new Array(bytes.length);
-        for(var i = 0; i<bytes.length; i++){
-          uint8bytes[i] = bytes.charCodeAt(i);
+        mediastring = null;
+        var bytestring = atob(media.data);
+        media.data = null;
+        var uint8bytes = [];//new Array(bytestring.length);
+        while(bytestring.length){
+          uint8bytes.push(bytestring.charCodeAt(0));
+          bytestring = bytestring.substring(1);
         }
         var byteArray = new Uint8Array(uint8bytes);
+        uint8bytes = null;
         var blob = new Blob([byteArray],media);
         var urlobj = URL.createObjectURL(blob);
         this.store[key] = urlobj;
@@ -83,6 +93,7 @@ angular.module('mean.system').controller('IndexController', ['$scope', '$rootSco
       catch(e){
         console.log(e.stack);
         console.log(e);
+        //alert(e);
         return;
       }
     };

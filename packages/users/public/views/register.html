@@ -6,11 +6,14 @@
   <div class="alert alert-danger animated fadeIn" ng-show="emailError">{{emailError}}</div>
 
   <h1>Register new {{user.role}}, with language {{user.language}}</h1>
-  <form ng-submit="register()" class="signup form-horizontal">
-    <div class="form-group">
+  <form name="registerForm" role="form" ng-submit="register(registerForm.$valid)" class="signup form-horizontal" novalidate>
+    <div class="form-group" ng-class="{ 'has-error' : submitted && registerForm.name.$invalid }">
       <label for="name" class="col-md-4 control-label">Full Name</label>
       <div class="col-md-8">
-        <input id="name" type="text" name="name" placeholder="Full name" class="form-control" ng-model="user.name"/>
+        <input required id="name" type="text" name="name" placeholder="Full name" class="form-control" ng-model="user.name"/>
+        <div ng-show="submitted && registerForm.name.$invalid" class="help-block">
+          <p ng-show="registerForm.name.$error.required">Full Name is required</p>
+        </div>
       </div>
     </div>
     <div ng-if="myRole === 'top-admin'" class="form-group">
@@ -27,28 +30,43 @@
         </select>
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-class="{ 'has-error' : submitted && registerForm.email.$invalid || emailError }">
       <label for="email" class="col-md-4 control-label">Email</label>
       <div class="col-md-8">
-        <input id="email" type="email" name="email" placeholder="Email" class="form-control" ng-model="user.email"/>
+        <input required id="email" type="email" name="email" placeholder="Email" class="form-control" ng-model="user.email"/>
+        <div ng-show="submitted && registerForm.email.$invalid" class="help-block">
+          <p ng-show="registerForm.email.$error.required">E-mail is required</p>
+          <p ng-show="registerForm.email.$error.email || emailError">E-mail is incorrect</p>
+        </div>
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-class="{ 'has-error' : submitted && registerForm.username.$invalid }">
       <label for="username" class="col-md-4 control-label">Username</label>
       <div class="col-md-8">
-        <input id="username" type="text" name="username" placeholder="Username" class="form-control" ng-model="user.username"/>
+        <input required id="username" type="text" name="username" placeholder="Username" class="form-control" ng-model="user.username"/>
+        <div ng-show="submitted && registerForm.username.$invalid" class="help-block">
+          <p ng-show="registerForm.email.$error.required">Username is required</p>
+        </div>
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-class="{ 'has-error' : submitted && registerForm.password.$invalid || user.password.length < 8 }">
       <label for="password" class="col-md-4 control-label">Password</label>
       <div class="col-md-8">
-        <input id="password" type="password" name="password" placeholder="Password" class="form-control" ng-model="user.password"/>
+        <input required maxlength="20" id="password" type="password" name="password" placeholder="Password" class="form-control" ng-model="user.password"/>
+        <div ng-show="submitted && registerForm.password.$invalid || user.password.length < 8" class="help-block">
+          <p ng-show="registerForm.password.$error.required">Password is required</p>
+          <p ng-show="user.password.length < 8">Password must be between 8-20 characters long</p>
+        </div>
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-class="{ 'has-error' : submitted && registerForm.confirmPassword.$invalid || user.password !== user.confirmPassword }">
       <label for="confirmPassword" class="col-md-4 control-label">Repeat Password</label>
       <div class="col-md-8">
-        <input id="confirmPassword" type="password" name="confirmPassword" placeholder="Password" class="form-control" ng-model="user.confirmPassword"/>
+        <input required id="confirmPassword" type="password" name="confirmPassword" placeholder="Password" class="form-control" ng-model="user.confirmPassword"/>
+        <div ng-show="submitted && registerForm.confirmPassword.$invalid || user.password !== user.confirmPassword" class="help-block">
+          <p ng-show="registerForm.confirmPassword.$error.required">Confirm password is required</p>
+          <p ng-show="user.password !== user.confirmPassword && !registerForm.confirmPassword.$error.required">Passwords do not match</p>
+        </div>
       </div>
     </div>
     <div class="form-group">

@@ -31,7 +31,6 @@
           -->
           <h2 class="dark-box">
             <span translate>{{form.title}}</span>
-            <span>{{form.questionsCounter}}</span>
           </h2>
           <accordion close-others="true">
             <div ng-repeat="question in form.content track by $index" ng-if="question.src !== ''" class="box">

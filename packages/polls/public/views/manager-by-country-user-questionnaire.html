@@ -1,6 +1,28 @@
 <section>
-  <div ng-if="countryUserQuestionnaireGridOptions">
-    <div style="width:100%; height:900px;" class="gridStyle" ng-grid="countryUserQuestionnaireGridOptions">
+  <div class="row">
+    <div class="col-md-6">
+      <div ng-if="countryUserQuestionnaireGridOptions">
+        <div style="width:100%; height:900px;" class="gridStyle" ng-grid="countryUserQuestionnaireGridOptions">
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div ng-if="activeTab === 4 && results.length > 0" class="row">
+        <div class="col-md-6">
+          <span>Choose user</span>
+          <select class="btn btn-default" ng-model="pointer.currentlySelected2" ng-options="value for value in userResults" ng-change="drawPie([pointer.currentlySelected,pointer.currentlySelected2],'questionnaire','countryUserQuestionnaireGraphData',['country','user'])">
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div 
+        ng-if="activeTab === 4 && results.length > 0"
+        data-ac-chart="'pie'" 
+        data-ac-data="countryUserQuestionnaireGraphData" 
+        data-ac-config="countryUserQuestionnaireGraphConfig" 
+        class="chart"
+        style="width:450px;height:300px;">
+      </div>
     </div>
   </div>
 </section>
