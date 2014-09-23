@@ -1,4 +1,4 @@
-  <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.title.$invalid }">
+  <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.kind.$invalid }">
     <label mean-token="'create-title'" class="col-md-3 control-label">Kind</label>
     <div class="col-md-9">
       <select class="btn btn-default" name="kind" ng-model="pointerObj.kind" required ng-options="value for value in questionKinds">
@@ -28,7 +28,7 @@
     </div>
   </div>
 
-  <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.title.$invalid }">
+  <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.conditional.$invalid }">
     <label mean-token="'create-title'" class="col-md-3 control-label">Conditonal</label>
     <div class="col-md-9">
       <select class="btn btn-default" name="conditional" ng-model="pointerObj.conditional" required ng-options="value for value in conditionalTypes" ng-change="ifNoneEmptyValue(pointerObj.conditional)">
@@ -37,31 +37,34 @@
   </div>
 
   <div ng-if="pointerObj.conditional !== 'none'">
-    <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.title.$invalid }">
+    <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.conditionalValue.$invalid }">
       <label mean-token="'create-title'" class="col-md-3 control-label">Conditonal VALUE</label>
       <div class="col-md-9">
-        <select class="btn btn-default" name="conditionalValue" ng-model="pointerObj.conditionalValue" required ng-options="value for value in content" ng-required="pointerObj.conditional !== 'none'">
+        <select class="btn btn-default" name="conditionalValue" ng-model="pointerObj.conditionalValue" ng-options="value for value in content" ng-required="pointerObj.conditional !== 'none'">
         </select>
       </div>
     </div>
   </div>
 
-  <div ng-if="pointerObj.kind === 'radio'" class="form-group">
+  <div ng-if="pointerObj.kind === 'radio'" class="form-group" ng-class="{ 'has-error' : submitted && content.length === 0}">
     <label class="col-md-3 control-label">Answers:</label>
     <ul class="col-md-3">
       <li ng-repeat="question in content track by $index">
+        <a class="btn" data-ng-click="removeAnswerC($index)" style="color:blue;">
+          <i class="glyphicon glyphicon-minus"></i>
+        </a>
         {{question}}
       </li>
-    </ul>
+    </ul><br/>
+    <div ng-show="submitted && content.length === 0" class="help-block">
+      <p ng-show="content.length === 0">Answers are required</p>
+    </div>
   </div>
 
-  <div ng-if="pointerObj.kind === 'radio'" class="form-group" ng-class="{ 'has-error' : submitted && questionForm.content.$invalid }">
+  <div ng-if="pointerObj.kind === 'radio'" class="form-group">
     <label mean-token="'create-content'" for="content" class="col-md-3 control-label">Answer</label>
     <div class="col-md-9">
       <input type="text" name="content" data-ng-model="pointerObj.question" id="content" cols="30" rows="3" placeholder="Answer" class="form-control" required></input>
-      <div ng-show="submitted && questionForm.content.$invalid" class="help-block">
-        <p ng-show="questionForm.content.$error.required">Answers are required</p>
-      </div>
     </div>
   </div>
 

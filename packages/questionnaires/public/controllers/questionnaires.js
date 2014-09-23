@@ -24,8 +24,6 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
 
     $scope.content = [];
 
-    $scope.contentMissing = false;
-
     $scope.active = false;
 
     $scope.languageShortcodeArray = $scope.global.languageShortcodes;
@@ -36,11 +34,8 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
     $scope.backgroundImageSrc = '';
 
     $scope.create = function(isValid) {
-      if (isValid) {
-        if($scope.content.length === 0){
-          $scope.contentMissing = true;
-          return;
-        }
+      var customValidation = $scope.content.length === 0;
+      if (isValid && customValidation) {
         var imageFileNames = convertToMediaFileNameArray($scope.content,'Image');
         var videoFileNames = convertToMediaFileNameArray($scope.content,'Video');
         convertToIdArray($scope.content);

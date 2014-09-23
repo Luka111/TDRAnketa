@@ -3,7 +3,7 @@
 
     <div class="alert alert-warning">You can only create <strong>Question</strong> or <strong>Label</strong>. Image or Video are just placeholders and they don't have specific attributes so you add them in forms just like the way they are - static and not customizable</div>
 
-    <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.title.$invalid }">
+    <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.type.$invalid }">
       <label mean-token="'create-title'" class="col-md-3 control-label">Type</label>
       <div class="col-md-9">
         <select class="btn btn-default" name="type" ng-model="type" required ng-options="value for value in creatableTypes" ng-change="ifNotQuestionEmptyKind(type)">

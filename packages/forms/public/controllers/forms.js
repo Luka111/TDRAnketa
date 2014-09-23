@@ -13,12 +13,9 @@ angular.module('mean.forms').controller('FormsController', ['$scope', '$rootScop
 
     $scope.addQuestion = function(question,array,index){
       index = index || $scope.questions.indexOf(question);
-      console.log('INDEX BRE',index);
-      $scope.contentMissing = false;
       if(question === null){
         if(index === -1){
           question = $scope.videoQuestion;
-          console.log('VIDEO JE BRE',question);
         }else{
           if(index === -2){
             question = $scope.imageQuestion;
@@ -50,14 +47,9 @@ angular.module('mean.forms').controller('FormsController', ['$scope', '$rootScop
       }
     };
 
-    $scope.contentMissing = false;
-
     $scope.create = function(isValid) {
-      if (isValid) {
-        if($scope.content.length === 0){
-          $scope.contentMissing = true;
-          return;
-        }
+      var customValidation = $scope.content.length !== 0;
+      if (isValid && customValidation) {
         $scope.convertToIdArray($scope.content);
         var form = new Forms({
           title: this.title,
@@ -92,7 +84,8 @@ angular.module('mean.forms').controller('FormsController', ['$scope', '$rootScop
     };
 
     $scope.update = function(isValid) {
-      if (isValid) {
+      var customValidation = $scope.content.length !== 0;
+      if (isValid && customValidation) {
         if($scope.form.content.length === 0){
           $scope.contentMissing = true;
           return;

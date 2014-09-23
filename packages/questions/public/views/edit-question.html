@@ -1,18 +1,18 @@
     <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.title.$invalid }">
-      <label mean-token="'create-title'" class="col-md-2 control-label">Kind</label>
-      <div class="col-md-10">
-        <select class="btn btn-default" name="kind" ng-model="question.kind" required ng-options="value for value in questionKinds">
-        </select>
-      </div>
-    </div>
-
-    <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.title.$invalid }">
       <label mean-token="'edit-title'" for="title" class="col-md-2 control-label">Title</label>
       <div class="col-md-10">
         <input name="title" type="text" class="form-control" data-ng-model="question.title" id="title" placeholder="Title" required>
         <div ng-show="submitted && questionForm.title.$invalid" class="help-block">
           <p ng-show="questionForm.title.$error.required">Title is required</p>
         </div>
+      </div>
+    </div>
+
+    <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.kind.$invalid }">
+      <label mean-token="'create-title'" class="col-md-2 control-label">Kind</label>
+      <div class="col-md-10">
+        <select class="btn btn-default" name="kind" ng-model="question.kind" required ng-options="value for value in questionKinds">
+        </select>
       </div>
     </div>
 
@@ -28,34 +28,36 @@
       </div>
     </div>
 
-    <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.title.$invalid }">
+    <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.conditional.$invalid }">
       <label mean-token="'create-title'" class="col-md-2 control-label">Conditonal</label>
       <div class="col-md-10">
-        <select class="btn btn-default" name="questin.conditional" ng-model="question.conditional.kind" required ng-options="value for value in conditionalTypes" ng-change="ifNoneEmptyValueEdit(question.conditional.kind)">
+        <select class="btn btn-default" name="conditional" ng-model="question.conditional.kind" required ng-options="value for value in conditionalTypes" ng-change="ifNoneEmptyValueEdit(question.conditional.kind)">
         </select>
       </div>
     </div>
 
-    <div ng-if="question.conditional !== 'none'">
-      <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.title.$invalid }">
+    <div ng-if="question.conditional.kind !== 'none'">
+      <div class="form-group" ng-class="{ 'has-error' : question.conditional.kind !== 'none' && !question.conditional.value }">
         <label mean-token="'create-title'" class="col-md-2 control-label">Conditonal VALUE</label>
         <div class="col-md-10">
-          <select class="btn btn-default" name="question.conditional.value" ng-model="question.conditional.value" required ng-options="value for value in question.content" ng-required="question.conditional.kind !== 'none'">
+          <select class="btn btn-default" name="conditionalValue" ng-model="question.conditional.value" ng-options="value for value in question.content" ng-required="question.conditional.kind !== 'none'">
           </select>
         </div>
       </div>
     </div>
 
-    <div ng-if="question.kind === 'radio'" class="form-group" ng-class="{ 'has-error' : submitted && questionForm.content.$invalid }">
+    <div ng-if="question.kind === 'radio'" class="form-group" ng-class="{ 'has-error' : question.content.length === 0 }">
       <label mean-token="'edit-content'" for="content" class="col-md-2 control-label">Content</label>
       <div class="col-md-10">
         <div ng-repeat="answer in question.content track by $index">
-          <input type="text" name="content" data-ng-model="answer" ng-blur="changeAnswer($index,answer)" id="content" cols="10" rows="3" class="form-control" required></input>
-          <a mean-token="'remove-answer'" class="btn btn-warning" ng-click="removeAnswer($index)" style="margin-top:10px; margin-bottom:10px;">Remove</a>
+          <a class="btn" data-ng-click="removeAnswer($index)" style="color:blue;">
+            <i class="glyphicon glyphicon-minus"></i>
+          </a>
+          <span>{{answer}}</span>
           <br/>
         </div>
-        <div ng-show="submitted && questionForm.content.$invalid" class="help-block">
-          <p ng-show="questionForm.content.$error.required">Content is required</p>
+        <div ng-show="question.content.length === 0" class="help-block">
+          <p ng-show="question.content.length === 0">Content is required</p>
         </div>
       </div>
     </div>
@@ -66,12 +68,9 @@
         <label ng-show="question.content.length" style="color:#3399dd;">Optional</label>
         <label ng-hide="question.content.length" style="color:#dd9933;">Required</label>
       </div>
-      <div class="col-md-10" ng-class="{ 'has-error' : !question.content.length && !newAnwser.length }">
+      <div class="col-md-10">
         <input type="text" class="form-control" data-ng-model="newAnswer" cols=10" rows="3"></input>
         <a ng-show="question.content.length" ng-click="addNewAnswer(newAnswer)" class="btn btn-info" style="margin-top:10px;">Add +</a>
         <a ng-hide="question.content.length" ng-click="addNewAnswer(newAnswer)" class="btn btn-warning" style="margin-top:10px;">Add +</a>
-        <div ng-show="emptyNewAnswer" class="help-block">
-          <p style="color:#ff3333;">Content is required</p>
-        </div>
       </div>
     </div>

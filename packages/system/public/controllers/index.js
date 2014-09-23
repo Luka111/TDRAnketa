@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('mean.system').controller('IndexController', ['$scope', '$rootScope', 'Global', 'identityService', '$http',
-  function($scope, $rootScope, Global, identityService, $http) {
+angular.module('mean.system').controller('IndexController', ['$scope', '$rootScope', 'Global', 'identityService', '$http', 'clientStorage',
+  function($scope, $rootScope, Global, identityService, $http, clientStorage) {
     $scope.global = Global;
 
     function assignUserVars(){
@@ -20,11 +20,7 @@ angular.module('mean.system').controller('IndexController', ['$scope', '$rootSco
 
     function MediaStorage(){
       this.store = {};
-      localStorage.setItem('bla','truc');
-      for(var i in localStorage){
-        //alert('loading from localStorage '+i);
-        this.loadBlob(i);
-      }
+      clientStorage.iterate('media',this.loadBlob.bind(this));
       console.log('my store',this.store);
     }
     MediaStorage.prototype.load = function(mediaelementid,mediaurl){
@@ -32,7 +28,6 @@ angular.module('mean.system').controller('IndexController', ['$scope', '$rootSco
       if(m){
         this.putMediaToElement(mediaelementid,m);
       }else{
-        //alert(JSON.stringify(this.store));
         console.log('gotta load',mediaurl);
         this.loadURL(mediaurl,this.putMediaToElement.bind(this,mediaelementid));
       }
@@ -62,21 +57,14 @@ angular.module('mean.system').controller('IndexController', ['$scope', '$rootSco
         var bd = btoa(filereader.result);
         //alert(bd.length);
         filereader = null;
-        localStorage.setItem('media:'+id,JSON.stringify({type:type,data:bd}));
+        clientStorage.save('media',id,{type:type,data:bd});
       }
       catch(e){
-        //alert(e);
+        alert(e);
       }
     };
-    MediaStorage.prototype.loadBlob = function(id){
-      var key = this.keyFromMediaKey(id);
-      if(!key){
-        return;
-      }
+    MediaStorage.prototype.loadBlob = function(key,media){
       try{
-        var mediastring = localStorage.getItem(id);
-        var media = JSON.parse(mediastring);
-        mediastring = null;
         var bytestring = atob(media.data);
         media.data = null;
         var uint8bytes = [];//new Array(bytestring.length);
@@ -97,22 +85,9 @@ angular.module('mean.system').controller('IndexController', ['$scope', '$rootSco
         return;
       }
     };
-    MediaStorage.prototype.isMediaKey = function(key){
-      return key.indexOf('media:')===0;
-    };
-    MediaStorage.prototype.keyFromMediaKey = function(mediakey){
-      if(!this.isMediaKey(mediakey)){
-        return;
-      }
-      return mediakey.substring(6);
-    };
     MediaStorage.prototype.purge = function(){
       this.store = {};
-      for(var i in localStorage){
-        if(this.isMediaKey(i)){
-          localStorage.removeItem(i);
-        }
-      }
+      window.clientStorage.purge('media');
     };
 
     var _MS = new MediaStorage();

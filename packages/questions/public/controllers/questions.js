@@ -103,6 +103,11 @@ angular.module('mean.questions').controller('QuestionsController', ['$scope', '$
 
     $scope.removeAnswer = function(index){
       $scope.question.content.splice(index,1);
+      if ($scope.question.content.indexOf($scope.question.conditional.value) === -1) $scope.question.conditional.value = '';
+    };
+
+    $scope.removeAnswerC = function(index){
+      $scope.content.splice(index,1);
     };
 
     $scope.remove = function(question) {
@@ -124,20 +129,10 @@ angular.module('mean.questions').controller('QuestionsController', ['$scope', '$
 
     $scope.addNewAnswer = function(newAnswer){
       if (!newAnswer){
-        $scope.emptyNewAnswer = true;
         return;
       }
       $scope.question.content.push(newAnswer);
-      $scope.emptyNewAnswer = false;
       $scope.submitted = false;
-    };
-
-    $scope.changeAnswer = function(index,answer){
-      if (!answer){
-        $scope.question.content.splice(index,1);
-      }else{
-        $scope.question.content[index] = answer;
-      }
     };
 
     $scope.update = function(isValid) {

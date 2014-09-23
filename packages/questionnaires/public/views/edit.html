@@ -3,11 +3,11 @@
     <h1>Edit questionnaire</h1>
     <br/>
     <form name="questionnaireForm" class="form-horizontal" role="form" data-ng-submit="update(questionnaireForm.$valid)" novalidate>
-      <div class="form-group" ng-class="{ 'has-error' : submitted && questionnaireForm.title.$invalid }">
+      <div class="form-group" ng-class="{ 'has-error' : questionnaireForm.title.$invalid }">
         <label mean-token="'create-title'" class="col-md-3 control-label">Title</label>
         <div class="col-md-9">
           <input name="title" type="text" class="form-control" data-ng-model="questionnaire.title" id="" placeholder="Title" required>
-          <div ng-show="submitted && questionnaireForm.title.$invalid" class="help-block">
+          <div ng-show="questionnaireForm.title.$invalid" class="help-block">
             <p ng-show="questionnaireForm.title.$error.required">Title is required</p>
           </div>
         </div>
@@ -53,7 +53,7 @@
       </div>
       -->
 
-      <div class="form-group" ng-class="{ 'has-error' : submitted && questionnaireForm.content.$invalid }">
+      <div class="form-group" ng-class="{ 'has-error' : questionnaire.content.length === 0 }">
         <label mean-token="'create-content'" for="content" class="col-md-3 control-label">Content</label>
         <div class="col-md-9">
           <ul class="forms unstyled">
@@ -133,8 +133,8 @@
                 </li>
               </accordion>
           </ul>
-          <div ng-show="contentMissing" class="help-block">
-            <p style="color:#FA787E;" ng-show="contentMissing">Content is required</p>
+          <div ng-show="questionnaire.content.length === 0" class="help-block">
+            <p style="color:#FA787E;" ng-show="questionnaire.content.length === 0">Content is required</p>
           </div>
         </div>
       </div>
