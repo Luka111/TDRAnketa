@@ -1,8 +1,10 @@
 'use strict';
 /*global jQuery:false */
 
-angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScope', '$window', '$stateParams', '$location', 'Global', 'Polls', 'Questionnaires', 'queryQuestionnaires', 'PollsQuery', 'DistinctUsers', 'PollStats', 'UsersQuery', 'identityService',
-  function($scope, $rootScope, $window, $stateParams, $location, Global, Polls, Questionnaires, queryQuestionnaires, PollsQuery, DistinctUsers, PollStats, identityService) {
+angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScope', '$window', '$stateParams', '$location', 'Global', 'Polls', 'Questionnaires', 'queryQuestionnaires', 'PollsQuery', 'DistinctUsers', 'PollStats', 'identityService','clientStorage',
+  function($scope, $rootScope, $window, $stateParams, $location, Global, Polls, Questionnaires, queryQuestionnaires, PollsQuery, DistinctUsers, PollStats, identityService, clientStorage) {
+    console.log('identityService',identityService);
+    console.log('clientStorage',clientStorage);
     $scope.global = Global;
 
     $scope.content = [];
@@ -23,16 +25,26 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
     $scope.languageShortcodeArray = $scope.global.languageShortcodes;
 
     function sendPoll(obj,lokation){
+      var poll;
+      //fetch from clientStorage
+      poll.$save(function(response){
+        //$timeout
+      });
+    }
+
+    function savePoll(obj,lokation){
       obj.geoLocation = {'type':'Point',coordinates:[lokation.coords.longitude,lokation.coords.latitude]};
       var poll = new Polls(obj);
-      poll.$save(function(response){
-        $scope.questionnaire = $scope.saveQuestionnaire;
-        initAnswers($scope.questionnaire);
+      clientStorage.save('results',(new Date()).getTime(),poll,function(result){
+        $scope.$apply(function(){
+          $scope.questionnaire = $scope.saveQuestionnaire;
+          initAnswers($scope.questionnaire);
+        });
       });
     }
 
     function geoLocatePoll(obj){
-      navigator.geolocation.getCurrentPosition(sendPoll.bind(null,obj),function(positionError){
+      navigator.geolocation.getCurrentPosition(savePoll.bind(null,obj),function(positionError){
         //PERMISSION DENIED
         if (positionError.code === 1){ 
           $scope.$apply(function(){

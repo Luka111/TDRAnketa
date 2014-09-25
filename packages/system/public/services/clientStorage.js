@@ -2,7 +2,10 @@
 
 angular.module('mean.system').provider('clientStorage',function(){
   var __instance;
-  this.$get = [function(){return __instance;}];
+  this.$get = [function(){
+    console.log('internally clientStorage return __instance',__instance);
+    return __instance;
+    }];
   function inherit(child,parnt){
     child.prototype = Object.create(parnt.prototype,{constructor:{
       value: child,
@@ -14,7 +17,7 @@ angular.module('mean.system').provider('clientStorage',function(){
 
   function StorageBase(){
   }
-  StorageBase.prototype.save = function(category,key,value){
+  StorageBase.prototype.save = function(category,key,value,cb){
     throw 'Storage Base has no implementation for save';
   };
   StorageBase.prototype.get = function(category,key){
@@ -39,8 +42,9 @@ angular.module('mean.system').provider('clientStorage',function(){
   function LocalStorage(){
   }
   inherit(LocalStorage,StorageBase);
-  LocalStorage.prototype.save = function(category,key,value){
+  LocalStorage.prototype.save = function(category,key,value,cb){
     localStorage.setItem(category+':'+key,JSON.stringify(value));
+    cb();
   };
   LocalStorage.prototype.get = function(category,key){
     return JSON.parse(localStorage.getItem(category+':'+key));
@@ -75,8 +79,21 @@ angular.module('mean.system').provider('clientStorage',function(){
   }
   IndexedDB.dbVersion=0;
   inherit(IndexedDB,StorageBase);
-  IndexedDB.prototype.save = function(category,key,value){
-    this.checkCategory(category,this.realSave.bind(this,category,key,value));
+  IndexedDB.prototype.save = function(category,key,value,cb){
+    this.checkCategory(category,this.realSave.bind(this,category,key,value,cb));
+  };
+  IndexedDB.prototype.purge = function(category){
+    if(!this.db){
+      this.dbWaiters.push(this.purge.bind(this,category));
+    }
+    if(!this.db.objectStoreNames.contains(category)){
+      console.log('no',category,'in db?!');
+      return;
+    }
+    console.log('purging',category);
+    var trans = this.db.transaction([category],'readwrite');
+    var objectStore = trans.objectStore(category);
+    objectStore.clear();
   };
   IndexedDB.prototype.reOpen = function(){
     if(this.db){
@@ -125,12 +142,12 @@ angular.module('mean.system').provider('clientStorage',function(){
       this.reOpen();
     }
   };
-  IndexedDB.prototype.realSave = function(category,key,value){
+  IndexedDB.prototype.realSave = function(category,key,value,cb){
     var trans = this.db.transaction([category],'readwrite');
     var store = trans.objectStore(category);
     var request = store.put({key:key,value:value});
     console.log('realSave request',request);
-    //trans.oncomplete = function(e){...}
+    trans.oncomplete = cb;
     //request.onerror = function(e){...}
   };
   IndexedDB.prototype.iterate = function(category,cb){
@@ -146,9 +163,13 @@ angular.module('mean.system').provider('clientStorage',function(){
   IndexedDB.prototype.onIterate = function(cb,e){
     var result = e.target.result;
     console.log('iterateResult',result);
+    if(!!result===false){
+      return;
+    }
     if(result && result.value){
       cb(result.value.key,result.value.value);
     }
+    result.continue();
   };
 
 
@@ -161,18 +182,19 @@ angular.module('mean.system').provider('clientStorage',function(){
     console.log('WebSQL opened',arguments);
     this.db = db;
   };
-  WebSQL.prototype.save = function(category,key,value){
-    this.db.transaction(this.txCheckCategoryForSave.bind(this,category,key,value));
+  WebSQL.prototype.save = function(category,key,value,cb){
+    this.db.transaction(this.txCheckCategoryForSave.bind(this,category,key,value,cb));
   };
-  WebSQL.prototype.txCheckCategoryForSave = function(category,key,value,tx){
-    tx.executeSql('CREATE TABLE IF NOT EXISTS '+category+' (key unique,value)',[],this.realSave.bind(this,category,key,value),null);
+  WebSQL.prototype.txCheckCategoryForSave = function(category,key,value,cb,tx){
+    tx.executeSql('CREATE TABLE IF NOT EXISTS '+category+' (key unique,value)',[],this.realSave.bind(this,category,key,value,cb),null);
   };
-  WebSQL.prototype.realSave = function(category,key,value,tx){
+  WebSQL.prototype.realSave = function(category,key,value,cb,tx){
     console.log('INSERT INTO',category);
-    tx.executeSql('INSERT INTO '+category+' (key,value) VALUES (?,?)',[key,JSON.stringify(value)],this.onSave.bind(this),null);
+    tx.executeSql('INSERT INTO '+category+' (key,value) VALUES (?,?)',[key,JSON.stringify(value)],this.onSave.bind(this,cb),null);
   };
-  WebSQL.prototype.onSave = function(tx,result){
-    console.log('onSave',tx,result);
+  WebSQL.prototype.onSave = function(cb,tx,result){
+    console.log('calling',cb.toString());
+    cb(result);
   };
   WebSQL.prototype.iterate = function(category,cb){
     this.db.transaction(this.txIterate.bind(this,category,cb));
@@ -190,11 +212,19 @@ angular.module('mean.system').provider('clientStorage',function(){
       cb(item.key,JSON.parse(item.value));
     }
   };
+  WebSQL.prototype.purge = function(category){
+    this.db.transaction(this.txPurge.bind(this,category));
+  };
+  WebSQL.prototype.txPurge = function(category,tx){
+    tx.executeSql('DROP TABLE '+category,[],function(tx,result){
+      console.log('drop',category,'ok');
+    });
+  };
 
 
 
   var enginesToTry = {
-    indexedDB:IndexedDB,
+    //indexedDB:IndexedDB,
     openDatabase:WebSQL,
     localStorage:LocalStorage
   };

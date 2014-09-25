@@ -2,7 +2,6 @@
 
 //Global service for global variables
 angular.module('mean.system').factory('identityService', ['$http', '$rootScope',
-
   function($http, $rootScope) {
     function assignDefaultUser(){
       $rootScope.user = {
@@ -30,5 +29,6 @@ angular.module('mean.system').factory('identityService', ['$http', '$rootScope',
         });
     }
     console.log('PRVO IDE ROOTSCOPE USER',$rootScope.user);
+    return 'No Instance From identityService';
   }
 ]);
