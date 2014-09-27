@@ -84,7 +84,7 @@ angular.module('mean.forms').controller('FormsController', ['$scope', '$rootScop
     };
 
     $scope.update = function(isValid) {
-      var customValidation = $scope.content.length !== 0;
+      var customValidation = $scope.form.content.length !== 0;
       if (isValid && customValidation) {
         if($scope.form.content.length === 0){
           $scope.contentMissing = true;

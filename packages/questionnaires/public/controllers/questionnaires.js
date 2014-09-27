@@ -34,7 +34,7 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
     $scope.backgroundImageSrc = '';
 
     $scope.create = function(isValid) {
-      var customValidation = $scope.content.length === 0;
+      var customValidation = $scope.content.length !== 0;
       if (isValid && customValidation) {
         var imageFileNames = convertToMediaFileNameArray($scope.content,'Image');
         var videoFileNames = convertToMediaFileNameArray($scope.content,'Video');
@@ -82,7 +82,9 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
           $scope.contentMissing = true;
           return;
         }
+        console.log('PRE CONVERTA',$scope.questionnaire.imageFiles);
         $scope.questionnaire.imageFiles = convertToMediaFileNameArray($scope.questionnaire.content,'Image');
+        console.log('POSLE CONVERTA',$scope.questionnaire.imageFiles);
         $scope.questionnaire.videoFiles = convertToMediaFileNameArray($scope.questionnaire.content,'Video');
         $scope.questionnaire.backgroundImage = $scope.backgroundImageSrc;
         convertToIdArray($scope.questionnaire.content);
@@ -133,62 +135,75 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
         questionnaireId: $stateParams.questionnaireId
       },onFindOne);
     };
-    
+      
+    function ifArrayItemNotExistsAdd(questionnaire,files,counter,formId){
+      if (typeof questionnaire[files][counter] === 'undefined'){
+        //Adding custom string, representing image placeholder
+        //This happens when additional images/videos are added
+        questionnaire[files].splice(counter,0,' undefined ' + formId);
+      }
+    }
+
     //Fill questions with src + fileType attribute 
-    //THIS IS VERY IMPORTANT - in the database is written string that contains fileName + ' ' + fileType
+    //THIS IS VERY IMPORTANT - in the database is written string that contains fileName + ' ' + fileType + ' ' + formId
     function fillSrcAttribute(questionnaire){
-      var imageCounter = 0,
-        videoCounter = 0;
+      var imageCounter=0, videoCounter=0, saveIFN, saveVFN;
       for (var i=0; i<questionnaire.content.length; i++){
         var form = questionnaire.content[i];
         for (var j=0; j<form.content.length; j++){
           var question = form.content[j];
           if (question.type === 'Image'){
+            ifArrayItemNotExistsAdd(questionnaire,'imageFiles',imageCounter);
             var ifn = questionnaire.imageFiles[imageCounter].split(' ');
-            if (ifn[0] === '' || ifn[0] === 'undefined'){
-              //Strange behavior from browser
-              question.src = '';
+            if (ifn[2] === form._id){
+              if (ifn[0] === '' || ifn[0] === 'undefined'){
+                //Strange behavior from browser
+                question.src = '';
+              }else{
+                question.src = ifn[0];
+                question.fileType = ifn[1];
+              }
+              imageCounter++;
             }else{
-              var fileName_fileType = questionnaire.imageFiles[imageCounter++].split(' ');
-              question.src = fileName_fileType[0];
-              question.fileType = fileName_fileType[1];
+              //If not matching we must check if we need to ADD or REMOVE element
+              if (!!saveIFN && ifn[2] === saveIFN[2]){
+                questionnaire.imageFiles.splice(imageCounter,1);
+                j--;
+              }else{
+                questionnaire.imageFiles.splice(imageCounter,0,' undefined ' + form._id);
+                j--;
+              }
             }
+            saveIFN = ifn;
           }
           if (question.type === 'Video'){
+            ifArrayItemNotExistsAdd(questionnaire,'videoFiles',videoCounter);
             var vfn = questionnaire.videoFiles[videoCounter].split(' ');
-            if (vfn[0] === '' || vfn[0] === 'undefined'){
-              //Strange behavior from browser
-              question.src = '';
+            if (vfn[2] === form._id){
+              if (vfn[0] === '' || vfn[0] === 'undefined'){
+                //Strange behavior from browser
+                question.src = '';
+              }else{
+                question.src = vfn[0];
+                question.fileType = vfn[1];
+                //Harcoded, necessary for Video ng-src. Angular or Browser bug still not sure
+                question.fullSrc = '/packages/system/public/media/' + question.src;
+              }
+              videoCounter++;
             }else{
-              var fileName_fileType2 = questionnaire.videoFiles[videoCounter++].split(' ');
-              question.src = fileName_fileType2[0];
-              question.fileType = fileName_fileType2[1];
-              //Harcoded, necessary for Video ng-src. Angular or Browser bug still not sure
-              question.fullSrc = '/packages/system/public/media/' + question.src;
+              if (!!saveVFN && vfn[2] === saveVFN[2]){
+                questionnaire.videoFiles.splice(videoCounter,1);
+                j--;
+              }else{
+                questionnaire.videoFiles.splice(videoCounter,0,' undefined ' + form._id);
+                j--;
+              }
             }
+            saveVFN = vfn;
           }
         }
       }
     }
-    
-    //Carousel fundamental
-    /***
-    $scope.slideIndex = 0;
-    */
-
-    //Videogular config obj
-    $scope.currentTime = 0;
-    $scope.totalTime = 0;
-    $scope.videogularConfig = {
-      width: 800,
-      height: 600,
-      responsive: true,
-      autoplay: false,
-      theme: '/bower_components/videogular-themes-default/videogular.css',
-      strech: 'fill',
-      autohide: 'true',
-      autohideTime: 2000
-    };
 
     //Form query
     function findForms(forms){
@@ -240,7 +255,7 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
         for(var j=0; j < form.content.length; j++){
           var question = form.content[j];
           if (question.type === type){
-            var fileName_fileType = question.src + ' ' + question.fileType;
+            var fileName_fileType = question.src + ' ' + question.fileType + ' ' + form._id;
             mediaFileNames.push(fileName_fileType);
           }
         }
@@ -309,6 +324,10 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
     //Remove file
     $scope.removeFile = function(index,array){
       array[index].src = '';
+      array[index].fileType = undefined;
+      if (typeof array[index].fullSrc !== 'undefined'){
+        array[index].fullSrc = '';
+      }
     };
 
     //Moving file forward through array
@@ -323,6 +342,8 @@ angular.module('mean.questionnaires').controller('QuestionnairesController', ['$
         if ((array[i].type === fileType) && (!array[i].src)){
           array[i].src = fileName;
           array[index].src = '';
+          array[i].fileType = array[index].fileType;
+          array[index].fileType = undefined;
           if (!!fullFileName){
             array[i].fullSrc = fullFileName;
             array[index].fullSrc = '';

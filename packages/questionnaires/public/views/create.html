@@ -104,6 +104,15 @@
                             <div ng-if="question.type === 'Image'">
                               <div class="img-responsive" ng-if="question.src">
                                 <img class="img-responsive" ng-src="/packages/system/public/media/{{question.src}}"/>
+                                <a class="btn" data-ng-click="removeFile($index,form.content)" style="color:red;">
+                                  <i class="glyphicon glyphicon-remove"></i>
+                                </a>
+                                <a class="btn" data-ng-click="moveForwardFile($index,form.content)" style="color:blue;">
+                                  <i class="glyphicon glyphicon-arrow-down"></i>
+                                </a>
+                                <a class="btn" data-ng-click="moveBackwardFile($index,form.content)" style="color:blue;">
+                                  <i class="glyphicon glyphicon-arrow-up"></i>
+                                </a>
                               </div>
                               <div ng-hide="question.src">
                                 <h5>
@@ -114,10 +123,19 @@
                             </div>
                             <div ng-if="question.type === 'Video'">
                               <div class="img-responsive" ng-if="question.src">
-                              <video controls>
-                                <source ng-src='{{question.fullSrc}}' type='{{question.fileType}}'>
-                              </video>
+                                <video controls>
+                                  <source ng-src='{{question.fullSrc}}' type='{{question.fileType}}'>
+                                </video>
                               </div>
+                              <a class="btn" data-ng-click="removeFile($index,form.content)" style="color:red;">
+                                <i class="glyphicon glyphicon-remove"></i>
+                              </a>
+                              <a class="btn" data-ng-click="moveForwardFile($index,form.content)" style="color:blue;">
+                                <i class="glyphicon glyphicon-arrow-down"></i>
+                              </a>
+                              <a class="btn" data-ng-click="moveBackwardFile($index,form.content)" style="color:blue;">
+                                <i class="glyphicon glyphicon-arrow-up"></i>
+                              </a>
                               <div ng-hide="question.src">
                                 <h5>
                                   <mean-upload file-dest="'/packages/system/public/media/'" upload-callback="" upload-file-callback="addFile(file,$index,form.content)"></mean-upload>

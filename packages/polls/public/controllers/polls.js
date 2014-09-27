@@ -1,8 +1,8 @@
 'use strict';
 /*global jQuery:false */
 
-angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScope', '$window', '$stateParams', '$location', 'Global', 'Polls', 'Questionnaires', 'queryQuestionnaires', 'PollsQuery', 'DistinctUsers', 'PollStats', 'identityService','clientStorage',
-  function($scope, $rootScope, $window, $stateParams, $location, Global, Polls, Questionnaires, queryQuestionnaires, PollsQuery, DistinctUsers, PollStats, identityService, clientStorage) {
+angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScope', '$window', '$stateParams', '$location', 'Global', 'Polls', 'Questionnaires', 'queryQuestionnaires', 'PollsQuery', 'DistinctUsers', 'PollStats', 'identityService','clientStorage','QuestionnaireHandler',
+  function($scope, $rootScope, $window, $stateParams, $location, Global, Polls, Questionnaires, queryQuestionnaires, PollsQuery, DistinctUsers, PollStats, identityService, clientStorage,QuestionnaireHandler) {
     console.log('identityService',identityService);
     console.log('clientStorage',clientStorage);
     $scope.global = Global;
