@@ -2,7 +2,7 @@
   <div class="light-box">
     <h1>Choose questionnaire</h1>
     <div>
-      <div ng-show="ifTopOrClientAdmin()">
+      <div ng-if="ifTopOrClientAdmin()">
         <label mean-token="'create-title'">Language</label>
         <select class="btn btn-default" ng-model="language" ng-options="value for value in languageShortcodeArray" ng-change="findQuestionnairesByLang(language)">
         </select>

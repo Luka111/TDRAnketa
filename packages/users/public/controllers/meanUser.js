@@ -243,6 +243,7 @@ angular.module('mean.users')
         })
           .success(function(response) {
             $rootScope.user = response.user;
+            console.log('NEMOGUCE OD ResetPasswordCtrl',response);
             $rootScope.$emit('loggedin');
             if (response.redirect) {
               if (window.location.href === response.redirect) {

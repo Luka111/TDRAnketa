@@ -1,0 +1,48 @@
+<section data-ng-controller="LanguagesController" data-ng-init="find()">
+  <ul class="languages unstyled">
+    <li data-ng-repeat="language in languages">
+      <h3>{{language._id}}</h3>
+      <h2>
+        <a data-ng-href="#!/languages/{{language._id}}">{{language.name}}</a>
+        <span data-ng-if="hasAuthorization(language)">
+          <a class="btn" href="/#!/languages/{{language._id}}/edit">
+            <i class="glyphicon glyphicon-edit"></i>
+          </a>
+          <a class="btn" data-ng-click="remove(language);">
+            <i class="glyphicon glyphicon-trash"></i>
+          </a>
+        </span>
+      </h2>
+    </li>
+  </ul>
+  <br/>
+  <button class="btn btn-info" ng-click="createVisible = !createVisible">Add New Language +</button>
+  <form ng-show="createVisible" name="languageForm" class="form-horizontal col-md-6" role="form" data-ng-submit="create(languageForm.$valid)" novalidate>
+    <div class="form-group" ng-class="{ 'has-error' : submitted && languageForm.languageId.$invalid }">
+      <label mean-token="'create-title'" class="col-md-3 control-label">Language Id</label>
+      <div class="col-md-9">
+        <input name="languageId" type="text" class="form-control" data-ng-model="languageId" id="languageId" placeholder="Language Id" required>
+        <div ng-show="submitted && languageForm.languageId.$invalid" class="help-block">
+          <p ng-show="languageForm.languageId.$error.required">Language Id is required</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="form-group" ng-class="{ 'has-error' : submitted && languageForm.languageId.$invalid }">
+      <label mean-token="'create-title'" class="col-md-3 control-label">Language Name</label>
+      <div class="col-md-9">
+        <input name="languageName" type="text" class="form-control" data-ng-model="languageName" id="languageName" placeholder="Language Name" required>
+        <div ng-show="submitted && languageForm.languageName.$invalid" class="help-block">
+          <p ng-show="languageForm.languageName.$error.required">Language Name is required</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="form-group">
+      <div class="col-md-offset-3 col-md-9">
+        <button type="submit" class="btn btn-info">Submit</button>
+      </div>
+    </div>
+  </form>
+  <h1 data-ng-hide="!languages || languages.length">No languages yet. <br> Why don't you <a href="/#!/languages/create">Create One</a>?</h1>
+</section>

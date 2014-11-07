@@ -1,14 +1,18 @@
 'use strict';
 /* global jQuery:false */
 
-angular.module('mean.polls').directive('questionvideo',function(){
+angular.module('mean.polls').directive('questionvideo',['questionVideoClass',function(QuestionVideoClass){
   return {
     restrict:'E',
     scope: {
       disabled: '=',
       played: '='
     },
-    link:function(scope,el,attrs){
+    link: function(scope,el,attrs){
+      new QuestionVideoClass(scope,el,attrs);
+    }
+    /*
+    function(scope,el,attrs){
 
       //Full screen button
       var goFullScreenAndPlay = function(elem){
@@ -52,21 +56,21 @@ angular.module('mean.polls').directive('questionvideo',function(){
               console.log(document.webkitIsFullScreen);
               if (!document.webkitIsFullScreen){
                 elem.pause();
-                this.style.display = 'none';
+                elem.style.display = 'none';
               }else{
                 elem.style.display = 'block';
               }
         }, false);
         //IOS
         elem.addEventListener('webkitendfullscreen', function () {
-              this.style.display = '-webkit-transform: rotateX(90deg); height: 0;';
+              elem.style.display = '-webkit-transform: rotateX(90deg); height: 0;';
         }, false);
         //IE11
         elem.addEventListener('msfullscreenchange', function () {
               console.log(document.msFullscreenElement);
               if (!document.msFullscreenElement){
                 elem.pause();
-                this.style.display = 'none';
+                elem.style.display = 'none';
               }
         }, false);
       };
@@ -118,6 +122,7 @@ angular.module('mean.polls').directive('questionvideo',function(){
       v.appendChild(s);
       addListeners(v);
     }
+    */
   };
-});
+}]);
 

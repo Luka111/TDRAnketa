@@ -1,7 +1,7 @@
   <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.kind.$invalid }">
     <label mean-token="'create-title'" class="col-md-3 control-label">Kind</label>
     <div class="col-md-9">
-      <select class="btn btn-default" name="kind" ng-model="pointerObj.kind" required ng-options="value for value in questionKinds">
+      <select class="btn btn-default" name="kind" ng-model="pointerObj.kind" required ng-options="value for value in questionKinds" ng-change="ifNotRadioEmpty(pointerObj.kind)">
       </select>
     </div>
   </div>
@@ -28,7 +28,7 @@
     </div>
   </div>
 
-  <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.conditional.$invalid }">
+  <div ng-if="pointerObj.kind === 'radio'" class="form-group" ng-class="{ 'has-error' : submitted && questionForm.conditional.$invalid }">
     <label mean-token="'create-title'" class="col-md-3 control-label">Conditonal</label>
     <div class="col-md-9">
       <select class="btn btn-default" name="conditional" ng-model="pointerObj.conditional" required ng-options="value for value in conditionalTypes" ng-change="ifNoneEmptyValue(pointerObj.conditional)">
@@ -36,7 +36,7 @@
     </div>
   </div>
 
-  <div ng-if="pointerObj.conditional !== 'none'">
+  <div ng-if="pointerObj.conditional && pointerObj.conditional !== 'none'">
     <div class="form-group" ng-class="{ 'has-error' : submitted && questionForm.conditionalValue.$invalid }">
       <label mean-token="'create-title'" class="col-md-3 control-label">Conditonal VALUE</label>
       <div class="col-md-9">

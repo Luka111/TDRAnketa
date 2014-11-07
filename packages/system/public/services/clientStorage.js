@@ -20,7 +20,7 @@ angular.module('mean.system').provider('clientStorage',function(){
   StorageBase.prototype.save = function(category,key,value,cb){
     throw 'Storage Base has no implementation for save';
   };
-  StorageBase.prototype.get = function(category,key){
+  StorageBase.prototype.get = function(category,key,cb){
     throw 'Storage Base has no implementation for get';
   };
   StorageBase.prototype.remove = function(category,key){
@@ -46,8 +46,8 @@ angular.module('mean.system').provider('clientStorage',function(){
     localStorage.setItem(category+':'+key,JSON.stringify(value));
     cb();
   };
-  LocalStorage.prototype.get = function(category,key){
-    return JSON.parse(localStorage.getItem(category+':'+key));
+  LocalStorage.prototype.get = function(category,key,cb){
+    cb(JSON.parse(localStorage.getItem(category+':'+key)));
   };
   LocalStorage.prototype.remove = function(category,key){
     localStorage.removeItem(category+':'+key);
@@ -79,9 +79,6 @@ angular.module('mean.system').provider('clientStorage',function(){
   }
   IndexedDB.dbVersion=0;
   inherit(IndexedDB,StorageBase);
-  IndexedDB.prototype.save = function(category,key,value,cb){
-    this.checkCategory(category,this.realSave.bind(this,category,key,value,cb));
-  };
   IndexedDB.prototype.purge = function(category){
     if(!this.db){
       this.dbWaiters.push(this.purge.bind(this,category));
@@ -131,24 +128,60 @@ angular.module('mean.system').provider('clientStorage',function(){
   };
   IndexedDB.prototype.checkCategory = function(category,cb){
     if(!this.db){
-      this.dbWaiters.push(this.checkCategory.bind(this,category,cb));
+      //this.dbWaiters.push(this.checkCategory.bind(this,category,cb));
+      setTimeout(this.checkCategory.bind(this,category,cb),100);
       return;
     }
     if(this.db.objectStoreNames.contains(category)){
       cb();
     }else{
       this.categories.push(category);
-      this.dbWaiters.push(this.checkCategory.bind(this,category,cb));
+      setTimeout(this.checkCategory.bind(this,category,cb),100);
+      //this.dbWaiters.push(this.checkCategory.bind(this,category,cb));
       this.reOpen();
     }
   };
+  function onSaveResult(cb,evnt){
+    if('function' === typeof cb){
+      cb(!evnt.target.error);
+    }
+  }
   IndexedDB.prototype.realSave = function(category,key,value,cb){
     var trans = this.db.transaction([category],'readwrite');
     var store = trans.objectStore(category);
     var request = store.put({key:key,value:value});
     console.log('realSave request',request);
-    trans.oncomplete = cb;
+    trans.oncomplete = onSaveResult.bind(null,cb);
     //request.onerror = function(e){...}
+  };
+  IndexedDB.prototype.save = function(category,key,value,cb){
+    this.checkCategory(category,this.realSave.bind(this,category,key,value,cb));
+  };
+  function onRemoveResult(cb,evnt){
+    cb(!evnt.target.error);
+  }
+  IndexedDB.prototype.realRemove = function(category,key,cb){
+    var trans = this.db.transaction([category],'readwrite');
+    var store = trans.objectStore(category);
+    var request = store.delete(key);
+    console.log('realSave request',request);
+    trans.oncomplete = onRemoveResult.bind(null,cb);
+    //request.onerror = function(e){...}
+  };
+  IndexedDB.prototype.remove = function(category,key,cb){
+    this.checkCategory(category,this.realRemove.bind(this,category,key,cb));
+  };
+  function onGetResult(cb,evnt){
+    cb(evnt && evnt.target&&evnt.target.result&&evnt.target.result.value ? JSON.parse(evnt.target.result.value) : null);
+  }
+  IndexedDB.prototype.realGet = function(category,key,cb){
+    var trans = this.db.transaction([category]);
+    var store = trans.objectStore(category);
+    var request = store.get(key);
+    request.onsuccess = onGetResult.bind(null,cb);
+  };
+  IndexedDB.prototype.get = function(category,key,cb){
+    this.checkCategory(category,this.realGet.bind(this,category,key,cb));
   };
   IndexedDB.prototype.iterate = function(category,cb){
     this.checkCategory(category,this.realIterate.bind(this,category,cb));
@@ -196,6 +229,18 @@ angular.module('mean.system').provider('clientStorage',function(){
     console.log('calling',cb.toString());
     cb(result);
   };
+  WebSQL.prototype.get = function(category,key,cb){
+    this.db.transaction(this.txGet.bind(this,category,key,cb));
+  };
+  WebSQL.prototype.txGet = function(category,key,cb,tx){
+    tx.executeSql('SELECT * FROM '+category+' WHERE key =?',[key], cb);
+  };
+  WebSQL.prototype.remove = function(category,key,cb){
+    this.db.transaction(this.txRemove.bind(this,category,key,cb));
+  };
+  WebSQL.prototype.txRemove = function(category,key,cb,tx){
+    tx.executeSql('DELETE * FROM '+category+' WHERE key =?',[key], cb);
+  };
   WebSQL.prototype.iterate = function(category,cb){
     this.db.transaction(this.txIterate.bind(this,category,cb));
   };
@@ -224,7 +269,7 @@ angular.module('mean.system').provider('clientStorage',function(){
 
 
   var enginesToTry = {
-    //indexedDB:IndexedDB,
+    indexedDB:IndexedDB,
     openDatabase:WebSQL,
     localStorage:LocalStorage
   };

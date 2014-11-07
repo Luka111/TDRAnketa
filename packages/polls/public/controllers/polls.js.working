@@ -1,0 +1,65 @@
+    $scope.calculateCounter = function(question, form){
+      if (question.answeredIndicator === 1 && (question.required === true || question.type === 'Image' || question.type === 'Video')) form.questionsCounter --;
+      question.answeredIndicator = 0;
+      //Logic for conditional questions
+      if (question.type === 'Question'){
+        if (question.conditional.kind === 'form'){
+          if (question.conditional.value === question.answer){
+            saveLoadedForms = $scope.loadedForms.slice();
+            saveCompletedPercent = $scope.completedPercent;
+            saveCompletedPercentStyle = $scope.completedPercentStyle;
+            saveShowSubmit = $scope.showSubmit;
+            disableQuestions(form,question,form._id);
+          }else{
+            if (question.conditionalValueActive){
+              question.conditionalValueActive = false;
+              if(saveLoadedForms){
+                $scope.loadedForms = saveLoadedForms.slice();
+              }
+              saveLoadedForms = null;
+              $scope.completedPercent = saveCompletedPercent;
+              $scope.completedPercentStyle = saveCompletedPercentStyle;
+              $scope.showSubmit = saveShowSubmit;
+              enableQuestions(form,question,form._id);
+            }
+          }
+        }
+        if (question.conditional.kind === 'questionnaire'){
+          if (question.conditional.value === question.answer){
+            saveLoadedForms = $scope.loadedForms.slice();
+            saveCompletedPercent = $scope.completedPercent;
+            saveCompletedPercentStyle = $scope.completedPercentStyle;
+            saveShowSubmit = $scope.showSubmit;
+            for (var i=0; i<$scope.questionnaire.content.length; i++){
+              var currForm = $scope.questionnaire.content[i];
+              disableQuestions(currForm,question,form._id);
+            }
+          }else{
+            if (question.conditionalValueActive){
+              $scope.loadedForms = saveLoadedForms.slice();
+              saveLoadedForms = null;
+              $scope.completedPercent = saveCompletedPercent;
+              $scope.completedPercentStyle = saveCompletedPercentStyle;
+              $scope.showSubmit = saveShowSubmit;
+              question.conditionalValueActive = false;
+              for (var j=0; j<$scope.questionnaire.content.length; j++){
+                var currFormJ = $scope.questionnaire.content[j];
+                enableQuestions(currFormJ,question,form._id);
+              }
+            }
+          }
+        }
+      }
+      //
+      if (form.questionsCounter === 0 && form._id === $scope.loadedForms[$scope.loadedForms.length-1]._id){
+        /* DUNNO WHY NOT WORKS
+        if ($scope.slideIndex+1 < $scope.questionnaire.content.length){
+          $scope.slideIndex+=1;
+          console.log('POVECAVAM!',$scope.slideIndex, $scope.questionnaire.content.length);
+        }
+        */
+        addToLoadedForms();
+      }
+    };
+
+

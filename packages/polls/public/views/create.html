@@ -12,7 +12,7 @@
       <h1>{{questionnaire.title}}</h1>
       -->
       <ul class="pagination">
-        <li ng-repeat="slide in questionnaire.content track by $index" ng-class="{'active': $index === slideIndex}" ng-click="changeSlide($index)"><span>{{$index + 1}}</span></li>
+        <li ng-repeat="slide in questionnaire.forms track by $index" ng-class="{'active': $index === slideIndex}" ng-click="changeSlide($index)"><span>{{$index + 1}}</span></li>
       </ul>
       <div class="progress">
         <div class="progress-bar" role="progressbar" aria-valuenow="{{completedPercent}}" aria-valuemin="0" aria-valuemax="100" ng-style="completedPercentStyle">
@@ -25,27 +25,24 @@
       -->
       <ul rn-carousel rn-carousel-index="slideIndex" rn-carousel-swipe="true">
         <li data-ng-repeat="form in loadedForms track by $index" class="light-box">
-          <!-- TEST
-          <h1>QUESTIONS COUNTER {{form.questionsCounter}}</h1>
-          <h1>{{slideIndex}}</h1>
-          -->
+          <h1>QUESTIONS COUNTER {{form.questionsCounter.value}}</h1>
           <h2 class="dark-box">
             <span translate>{{form.title}}</span>
           </h2>
           <accordion close-others="true">
-            <div ng-repeat="question in form.content track by $index" ng-if="question.src !== ''" class="box">
+            <div ng-repeat="question in form.questions track by $index" ng-if="question.src !== ''" class="box">
               <div ng-switch on="question.type">
                 <!--
                 <span>{{question.type}}</span><br/>
                 -->
                 <div ng-switch-when="Question">
-                  <accordion-group is-open="question.isToggled" is-disabled="question.disabled">
-                  <accordion-heading><h3 style="cursor: pointer;" ng-class="{'text-muted': question.disabled}">{{question.title}}<span ng-show="!!question.answer" style="color:#428bca;"> - {{question.answer}}</span></h3></accordion-heading>
+                  <accordion-group is-open="question.isToggled" is-disabled="question.disabled.value">
+                  <accordion-heading><h3 style="cursor: pointer;" ng-class="{'text-muted': question.disabled.value}">{{question.title}}<span ng-show="!!question.answer.value" style="color:#428bca;"> - {{question.answer.value}}</span></h3></accordion-heading>
                     <!--
                     <h3>
                     {{question.title}}
                     TESTING
-                    <h1>{{question.required}}</h1>
+                    <h1>{{question.required.value}}</h1>
                     <h1>{{question.saveDisabled}}</h1>
                     {{question.conditional}}
                     ({{question.kind}})
@@ -55,24 +52,24 @@
                     <!-- DIFFERENT INPUT TYPE - DEPENDS ON QUESTION.KIND -->
                     <!-- RADIO -->
                     <div ng-if="question.kind === 'radio'">
-                      <div ng-if="!question.required && !!question.answer">
+                      <div ng-if="!question.required.value && !!question.answer.value">
                         <a class="btn" data-ng-click="removeAnswer(question)" style="color:red;">
                           <i class="glyphicon glyphicon-remove"></i>
                         </a>
                       </div>
                       <div ng-repeat="answer in question.content track by $index">
                         <h3>
-                        <input type="radio" class="css-checkbox" ng-model="question.answer" ng-value="answer" ng-change="calculateCounter(question,form)" ng-required="question.required" ng-disabled="question.disabled"><label class="css-label">{{answer}}</label>
+                        <input type="radio" class="css-checkbox" ng-model="question.answer.value" ng-value="answer" ng-change="question.updateCounter()" ng-required="question.required.value" ng-disabled="question.disabled.value"><label class="css-label">{{answer}}</label>
                         </h3>
                       </div>
                     </div>
                     <!-- EMAIL -->
                     <div ng-if="question.kind === 'email'">
-                      <input class="form-control" type="email" ng-model="question.answer" ng-value="answer" ng-blur="calculateCounter(question,form)" ng-required="question.required" ng-disabled="question.disabled" placeholder="Enter e-mail...">
+                      <input class="form-control" type="email" ng-model="question.answer.value" ng-value="answer" ng-blur="question.updateCounter()" ng-required="question.required.value" ng-disabled="question.disabled.value" placeholder="Enter e-mail...">
                     </div>
                     <!-- TEXTAREA -->
                     <div ng-if="question.kind === 'textarea'">
-                      <textarea class="form-control" type="textarea" ng-model="question.answer" ng-value="answer" ng-blur="calculateCounter(question,form)" ng-required="question.required" ng-disabled="question.disabled" ng-trim="true" ng-maxlength="120" rows="8"></textarea>
+                      <textarea class="form-control" type="textarea" ng-model="question.answer.value" ng-value="answer" ng-blur="question.updateCounter()" ng-required="question.required.value" ng-disabled="question.disabled.value" ng-trim="true" ng-maxlength="120" rows="8"></textarea>
                     </div>
                   </accordion-group>
                 </div>
@@ -82,12 +79,12 @@
 
                 <div ng-switch-when="Image">
                   <div style="width:100%" class="img-responsive">
-                    <questionimage disabled="question.disabled" ng-click="calculateCounter(question,form)" ng-href="/packages/system/public/media/{{question.src}}" data-lightbox="tdr-anketa"/>
+                    <questionimage disabled="question.disabled.value" ng-click="question.updateCounter()" ng-href="/packages/system/public/media/{{question.src}}" data-lightbox="tdr-anketa"/>
                   </div>
                 </div>
                 <div ng-switch-when="Video">
                   <div style="width:100%"  class="img-responsive">
-                    <questionvideo played="question.answeredIndicator" ng-click="calculateCounter(question,form)" disabled="question.disabled" src='{{question.fullSrc}}' type='{{question.fileType}}'/>
+                    <questionvideo played="question.answeredIndicator" ng-click="question.updateCounter()" disabled="question.disabled.value" src='{{question.fullSrc}}' type='{{question.fileType}}'/>
                   </div>
                 </div>
               </div>

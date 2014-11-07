@@ -2,9 +2,11 @@
 /*global jQuery:false */
 
 angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScope', '$window', '$stateParams', '$location', 'Global', 'Polls', 'Questionnaires', 'queryQuestionnaires', 'PollsQuery', 'DistinctUsers', 'PollStats', 'identityService','clientStorage','QuestionnaireHandler',
-  function($scope, $rootScope, $window, $stateParams, $location, Global, Polls, Questionnaires, queryQuestionnaires, PollsQuery, DistinctUsers, PollStats, identityService, clientStorage,QuestionnaireHandler) {
-    console.log('identityService',identityService);
-    console.log('clientStorage',clientStorage);
+  function($scope, $rootScope, $window, $stateParams, $location, Global, Polls, Questionnaires, queryQuestionnaires, PollsQuery, DistinctUsers, PollStats, identityService, clientStorage, QuestionnaireHandler) {
+    function setQuestionnaireFromCS(q){
+      console.log('got questionnaire',q);
+    }
+    clientStorage.get('global','questionnaire',setQuestionnaireFromCS);
     $scope.global = Global;
 
     $scope.content = [];
@@ -37,60 +39,15 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
       var poll = new Polls(obj);
       clientStorage.save('results',(new Date()).getTime(),poll,function(result){
         $scope.$apply(function(){
-          $scope.questionnaire = $scope.saveQuestionnaire;
-          initAnswers($scope.questionnaire);
+          $scope.questionnaire.reset();
         });
       });
-    }
-
-    function geoLocatePoll(obj){
-      navigator.geolocation.getCurrentPosition(savePoll.bind(null,obj),function(positionError){
-        //PERMISSION DENIED
-        if (positionError.code === 1){ 
-          $scope.$apply(function(){
-            $scope.permissionDenied = 'You cannot submit because you denied to share your location privacy. Please enable location privacy and RELOAD page.';
-          });
-        }else{
-          $scope.permissionDenied= '';
-        }
-        //POSITION UNAVAILABLE
-        if (positionError.code === 2){ 
-          $scope.$apply(function(){
-            $scope.positionUnavailable= 'Your position cannot be determined. Network is down or the positioning satelites cannot be contacted.';
-          });
-        }else{
-          $scope.positionUnavailable= '';
-        }
-        //TIMEOUT
-        if (positionError.code === 3){ 
-          $scope.$apply(function(){
-            $scope.timeoutExpired= 'Timeout expired.';
-          });
-        }else{
-          $scope.timeoutExpired= '';
-        }
-        $scope.locationError = positionError.message;
-      },{maximumAge:600000, timeout:5000, enableHighAccuracy : true});
     }
 
     $scope.create = function(isValid) {
       if(!$scope.questionnaire) return;
       if (isValid) {
-        var title_answer_array = [];
-        for (var i=0; i<$scope.questionnaire.content.length; i++){
-          var form = $scope.questionnaire.content[i];
-          for (var j=0; j<form.content.length; j++){
-            var question = form.content[j];
-            if (question.type === 'Question'){
-              title_answer_array.push({ title: question.title, answer: question.answer});
-            }
-          }
-        }
-        geoLocatePoll({
-          answers : title_answer_array,
-          questionnaire : $scope.questionnaire._id,
-          questionnaireLanguage : $scope.questionnaire.language
-        });
+        $scope.questionnaire.save();
       }
     };
 
@@ -244,43 +201,6 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
       });
     };
     
-    //Fill questions with src + fileType attribute 
-    //THIS IS VERY IMPORTANT - in the database is written string that contains fileName + ' ' + fileType
-    var fillSrcAttribute = function(poll){
-      var imageCounter = 0,
-        videoCounter = 0;
-      for (var i=0; i<poll.content.length; i++){
-        var form = poll.content[i];
-        for (var j=0; j<form.content.length; j++){
-          var question = form.content[j];
-          if (question.type === 'Image'){
-            var ifn = poll.imageFiles[imageCounter].split(' ');
-            if (ifn[0] === '' || ifn[0] === 'undefined'){
-              //Strange behavior from browser
-              question.src = '';
-            }else{
-              var fileName_fileType = poll.imageFiles[imageCounter++].split(' ');
-              question.src = fileName_fileType[0];
-              question.fileType = fileName_fileType[1];
-            }
-          }
-          if (question.type === 'Video'){
-            var vfn = poll.videoFiles[videoCounter].split(' ');
-            if (vfn[0] === '' || vfn[0] === 'undefined'){
-              //Strange behavior from browser
-              question.src = '';
-            }else{
-              var fileName_fileType2 = poll.videoFiles[videoCounter++].split(' ');
-              question.src = fileName_fileType2[0];
-              question.fileType = fileName_fileType2[1];
-              //Harcoded, necessary for Video ng-src. Angular or Browser bug still not sure
-              question.fullSrc = '/packages/system/public/media/' + question.src;
-            }
-          }
-        }
-      }
-    };
-    
     //Carousel fundamental
     $scope.slideIndex = 0;
 
@@ -291,8 +211,23 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
       });
     };
 
+    $scope.initFunctionIndicators = {
+      findQuestionnaires : false,
+      findMyPolls : false,
+      findQuestionnairesByLang : false,
+      findQuestionnaireAndInitAnswers : false
+    }
+
+    function preventQueryIfNotUser(fnName){
+      if ($rootScope.user.roles[0] === ''){
+        $scope.initFunctionIndicators[fnName]= true;
+        return;
+      }
+    }
+
     //Questionnaires query
     $scope.findQuestionnaires = function(){
+      preventQueryIfNotUser('findQuestionnaires');
       queryQuestionnaires.query({
         active : true,
         language : $rootScope.user.language
@@ -307,6 +242,7 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
 
     //Find polls for user
     $scope.findMyPolls = function(){
+      preventQueryIfNotUser('findMyPolls');
       PollsQuery.query({
         user: $rootScope.user._id,
         dateFrom: truncDay(new Date())
@@ -317,6 +253,7 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
 
     //Find Questionnaires by lang
     $scope.findQuestionnairesByLang = function(lang){
+      preventQueryIfNotUser('findQuestionnairesByLang');
       queryQuestionnaires.query({
         active : true,
         language: lang
@@ -339,8 +276,7 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
     //Function for finding poll and initializing Answers array
     //Executed when poll.html is loaded
 
-    $scope.findQuestionnaireAndInitAnswers = function() {
-      //Recovery from URL, never forget chosen questionnaire
+    function reallyFindQuestionnaireAndInitAnswers(){
       if (!window.questionnaireId){
         if (!!$stateParams.questionnaireId){
           window.questionnaireId = $stateParams.questionnaireId;
@@ -364,69 +300,37 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
         initAnswers(questionnaire);
         $scope.showQuestionnaire = true;
       });
+    }
+    function applyQuestionnareData(q){
+      $scope.questionnaire = new QuestionnaireHandler($scope,q);
+    }
+    function dodaFindQuestionnaireAndInitAnswers(q){
+      if(q){
+        $scope.$apply(applyQuestionnareData.bind(null,q));
+      }else{
+        reallyFindQuestionnaireAndInitAnswers();
+      }
+    }
+
+    $scope.findQuestionnaireAndInitAnswers = function() {
+      preventQueryIfNotUser('findQuestionnaireAndInitAnswers');
+      //Recovery from URL, never forget chosen questionnaire
+      clientStorage.get('global','questionnaire',dodaFindQuestionnaireAndInitAnswers);
     };
 
     function initAnswers(questionnaire){
-      $scope.questionnaire = questionnaire;
-      //Ind showing submit button
-      $scope.showSubmit = false;
-      //BACKGROUND LOADER
-      if (questionnaire.backgroundImage){
-        jQuery('.operater').css('background-image','url(\'' + questionnaire.backgroundImage + '\')');
-      }else{
-        jQuery('.operater').css('background-image','none');
+      if($scope.questionnaire){
+        $scope.questionnaire.destroy();
       }
-      //Filling src
-      fillSrcAttribute(questionnaire);
-      //Initializing answers
-      for (var i=0; i<$scope.questionnaire.content.length; i++){
-        var form = $scope.questionnaire.content[i];
-        form.questionsCounter = 0;
-        for (var j=0; j<form.content.length; j++){
-          var question = form.content[j];
-          if (question.type === 'Question'){
-            question.answer = '';
-            question.disabled = false;
-            question.isToggled = false;
-            question.answeredIndicator = 1;
-            if (question.required){
-              form.questionsCounter++;
-            }
-          }
-          if (question.type === 'Image' || question.type === 'Video'){
-            if (!!question.src){
-              question.answeredIndicator = 1;
-              question.disabled = false;
-              form.questionsCounter++;
-            }
-          }
-        }
-      }
-      $scope.saveQuestionnaire = deepCopy($scope.questionnaire);
-      //We will load forms one at the time
-      //When the operator fill the form, he will get access to the next one and so on...
-      $scope.loadedForms = [];
-      addToLoadedForms();
-      $scope.slideIndex = 0;
-      window.scrollTo(0,0);
-    }
-
-    //DEEP COPY
-    function deepCopy(o) {
-      var copy = o,k;
-
-      if (o && typeof o === 'object') {
-        copy = Object.prototype.toString.call(o) === '[object Array]' ? [] : {};
-        for (k in o) {
-          copy[k] = deepCopy(o[k]);
-        }
-      }
-
-      return copy;
+      QuestionnaireHandler.produce($scope,questionnaire);
+      //$scope.questionnaire = new QuestionnaireHandler($scope,questionnaire);
     }
 
     //Removing current questionnaire and let the operator choose another one
     $scope.removeQuestionnaire = function(){
+      if($scope.questionnaire){
+        $scope.questionnaire.destroy();
+      }
       $scope.questionnaire = null;
       $location.path('polls/active');
     };
@@ -434,163 +338,15 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
 
     //Helper function for disabling
     var disableQuestions = function(form,question,qfId){
-      for (var i=0; i<form.content.length; i++){
-        var quest = form.content[i];
-        if (quest.type === 'Question'){
-          if(quest._id !== question._id || form._id !== qfId){
-            quest.saveOldRequired = quest.required;
-            quest.required = false;
-            if (!quest.saveDisabled || quest.saveDisabled < 0) quest.saveDisabled = 0;
-            quest.saveDisabled++;
-            quest.disabled = true;
-            quest.saveOldAnswer = quest.answer;
-            quest.answer = '';
-          }else{
-            question.conditionalValueActive = true;
-          }
-        }
-        if (quest.type === 'Image' || quest.type === 'Video'){
-          if (!quest.saveDisabled || quest.saveDisabled < 0) quest.saveDisabled = 0;
-          quest.saveDisabled++;
-          quest.disabled = true;
-        }
-      }
-      form.saveQuestionsCounter = form.questionsCounter;
-      form.questionsCounter = 0;
-      if (form._id === $scope.loadedForms[$scope.loadedForms.length-1]._id) addToLoadedForms();
+      form.disable(question,qfId);
+      if (form._id === $scope.loadedForms[$scope.loadedForms.length-1]._id) $scope.questionnaire.addToLoadedForms();
     };
 
     //Helper function for enabling 
     var enableQuestions = function(form,question,qfId){
-      for (var i=0; i<form.content.length; i++){
-        var quest = form.content[i];
-        if (quest.type === 'Question'){
-          if(quest._id !== question._id || form._id !== qfId){
-            quest.required = quest.saveOldRequired;
-            delete quest.saveOldRequired;
-            if (--quest.saveDisabled > 0){
-              quest.disabled = true;
-            }else{
-              quest.disabled = false;
-            }
-            quest.answer = quest.saveOldAnswer;
-            delete quest.saveOldAnswer;
-          }
-        }
-        if (quest.type === 'Image' || quest.type === 'Video'){
-          if (--quest.saveDisabled > 0){
-            quest.disabled = true;
-          }else{
-            quest.disabled = false;
-          }
-        }
-      }
-      form.questionsCounter = form.saveQuestionsCounter;
-      delete form.saveQuestionsCounter;
+      form.enable(question);
     };
 
-    var saveLoadedForms;
-    var saveCompletedPercent;
-    var saveCompletedPercentStyle;
-    var saveShowSubmit;
-
-    $scope.calculateCounter = function(question, form){
-      question.isToggled = !question.isToggled;
-      if (question.answeredIndicator === 1 && (question.required === true || question.type === 'Image' || question.type === 'Video')) form.questionsCounter --;
-      question.answeredIndicator = 0;
-      //Logic for conditional questions
-      if (question.type === 'Question'){
-        if (question.conditional.kind === 'form'){
-          if (question.conditional.value === question.answer){
-            saveLoadedForms = $scope.loadedForms.slice();
-            saveCompletedPercent = $scope.completedPercent;
-            saveCompletedPercentStyle = $scope.completedPercentStyle;
-            saveShowSubmit = $scope.showSubmit;
-            disableQuestions(form,question,form._id);
-          }else{
-            if (question.conditionalValueActive){
-              question.conditionalValueActive = false;
-              if(saveLoadedForms){
-                $scope.loadedForms = saveLoadedForms.slice();
-              }
-              saveLoadedForms = null;
-              $scope.completedPercent = saveCompletedPercent;
-              $scope.completedPercentStyle = saveCompletedPercentStyle;
-              $scope.showSubmit = saveShowSubmit;
-              enableQuestions(form,question,form._id);
-            }
-          }
-        }
-        if (question.conditional.kind === 'questionnaire'){
-          if (question.conditional.value === question.answer){
-            saveLoadedForms = $scope.loadedForms.slice();
-            saveCompletedPercent = $scope.completedPercent;
-            saveCompletedPercentStyle = $scope.completedPercentStyle;
-            saveShowSubmit = $scope.showSubmit;
-            for (var i=0; i<$scope.questionnaire.content.length; i++){
-              var currForm = $scope.questionnaire.content[i];
-              disableQuestions(currForm,question,form._id);
-            }
-          }else{
-            if (question.conditionalValueActive){
-              $scope.loadedForms = saveLoadedForms.slice();
-              saveLoadedForms = null;
-              $scope.completedPercent = saveCompletedPercent;
-              $scope.completedPercentStyle = saveCompletedPercentStyle;
-              $scope.showSubmit = saveShowSubmit;
-              question.conditionalValueActive = false;
-              for (var j=0; j<$scope.questionnaire.content.length; j++){
-                var currFormJ = $scope.questionnaire.content[j];
-                enableQuestions(currFormJ,question,form._id);
-              }
-            }
-          }
-        }
-      }
-      //
-      if (form.questionsCounter === 0 && form._id === $scope.loadedForms[$scope.loadedForms.length-1]._id){
-        /* DUNNO WHY NOT WORKS
-        if ($scope.slideIndex+1 < $scope.questionnaire.content.length){
-          $scope.slideIndex+=1;
-          console.log('POVECAVAM!',$scope.slideIndex, $scope.questionnaire.content.length);
-        }
-        */
-        addToLoadedForms();
-      }
-    };
-
-    //Helper function for adding new form to loadedForms
-    var addToLoadedForms = function(){
-      var numberOfLoadedForms = $scope.loadedForms.length;
-      $scope.completedPercent = parseFloat(($scope.loadedForms.length)*100/$scope.questionnaire.content.length).toFixed(1);
-      if(parseInt($scope.completedPercent)){
-        $scope.completedPercentStyle = {width: $scope.completedPercent+'%'};
-      }else{
-        $scope.completedPercentStyle = {width: '30px'};
-      }
-      if (numberOfLoadedForms === $scope.questionnaire.content.length){
-        $scope.showSubmit = true;
-      }else{
-        var newForm = $scope.questionnaire.content[numberOfLoadedForms];
-        $scope.loadedForms.push(newForm);
-        var ifNoQuestion = true;
-        for (var i=0; i<newForm.content.length; i++){
-          if (newForm.content[i].type === 'Question'){
-            if (newForm.content[i].required){
-              ifNoQuestion = false;
-              break;
-            }
-          }
-          if (newForm.content[i].type === 'Image' || newForm.content[i].type === 'Video'){
-            if (!!newForm.content[i].src){
-              ifNoQuestion = false;
-              break;
-            }
-          }
-        }
-        if (!!ifNoQuestion) addToLoadedForms();
-      }
-    };
     //Change slide
     $scope.changeSlide = function(index){
       if (index >= $scope.loadedForms.length){
@@ -1319,6 +1075,22 @@ angular.module('mean.polls').controller('PollsController', ['$scope', '$rootScop
     function executeOnLoggedin(){
       $scope.myRole = $rootScope.user.roles[1];
       $scope.myLanguage = $rootScope.user.language;
+      if (!!$scope.initFunctionIndicators.findQuestionnaires){
+        $scope.findQuestionnaires();
+        return;
+      }
+      if (!!$scope.initFunctionIndicators.findMyPolls){
+        $scope.findMyPolls();
+        return;
+      }
+      if (!!$scope.initFunctionIndicators.findQuestionnairesByLang){
+        $scope.findQuestionnairesByLang();
+        return;
+      }
+      if (!!$scope.initFunctionIndicators.findQuestionnaireAndInitAnswers){
+        $scope.findQuestionnaireAndInitAnswers();
+        return;
+      }
     }
 
     executeOnLoggedin();

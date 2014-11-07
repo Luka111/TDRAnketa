@@ -43,6 +43,14 @@ angular.module('mean.questions').controller('QuestionsController', ['$scope', '$
       }
     };
 
+    $scope.ifNotRadioEmpty = function(kind){
+      console.log('KIND',kind);
+      if (kind !== 'radio'){
+        $scope.pointerObj.conditional = '';
+        $scope.pointerObj.conditionalValue = '';
+      }
+    };
+
     //If type is not question empty kind
     $scope.ifNotQuestionEmptyKind = function(type){
       if (type !== 'Question'){
@@ -73,6 +81,10 @@ angular.module('mean.questions').controller('QuestionsController', ['$scope', '$
           $scope.pointerObj.required = null;
           $scope.pointerObj.kind = '';
           $scope.content = [];
+        }else{
+          if ($scope.pointerObj.kind !== 'radio'){
+            $scope.content = [];
+          }
         }
         //Empty everything that belongs ONLY to label
         if ($scope.type !== 'Label'){

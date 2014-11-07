@@ -1,0 +1,38 @@
+<section data-ng-controller="TranslationsController" ng-init="findLanguages()">
+  {{translationObj}}
+  <form name="translationForm" class="form-horizontal col-md-6" role="form" data-ng-submit="create(translationForm.$valid)" novalidate>
+
+    <div class="form-group" ng-class="{ 'has-error' : submitted && translationForm.original.$invalid }">
+      <label mean-token="'create-title'" class="col-md-3 control-label">Original</label>
+      <div class="col-md-9">
+        <input name="original" type="text" class="form-control" data-ng-model="translationObj.original" id="original" placeholder="Original" required>
+        <div ng-show="submitted && translationForm.original.$invalid" class="help-block">
+          <p ng-show="translationForm.original.$error.required">Original string is required</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group" ng-class="{ 'has-error' : submitted && translationForm.language.$invalid }">
+      <label mean-token="'create-title'" class="col-md-3 control-label">Language</label>
+      <div class="col-md-9">
+        <select class="btn btn-default" name="language" ng-model="translationObj.languageId" required ng-options="value._id as value.name for value in languages"></select>
+      </div>
+    </div>
+
+    <div class="form-group" ng-class="{ 'has-error' : submitted && translationForm.translation.$invalid }">
+      <label mean-token="'create-title'" class="col-md-3 control-label">Translation</label>
+      <div class="col-md-9">
+        <input name="translation" type="text" class="form-control" data-ng-model="translationObj.translation" id="translation" placeholder="Translation" required>
+        <div ng-show="submitted && translationForm.translation.$invalid" class="help-block">
+          <p ng-show="translationForm.translation.$error.required">Translation string is required</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-md-offset-3 col-md-9">
+        <button type="submit" class="btn btn-info">Submit</button>
+      </div>
+    </div>
+  </form>
+</section>

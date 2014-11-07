@@ -19,7 +19,17 @@ angular.module('mean.system').factory('mediaStorage',['clientStorage','$http',fu
   };
   MediaStorage.prototype.putMediaToElement = function(mediaelementid,media){
     console.log('putting src to',media);
-    document.getElementById(mediaelementid).src = media;
+    switch(typeof mediaelementid){
+      case 'string':
+        document.getElementById(mediaelementid).src = media;
+        break;
+      case 'object':
+        mediaelementid.src = media;
+        break;
+      case 'function':
+        mediaelementid(media);
+        break;
+    }
   };
   MediaStorage.prototype.loadURL = function(mediaurl,cb){
     this.transfer.get(mediaurl,{responseType:'blob'}).success(this.onURLLoaded.bind(this,mediaurl,cb));
